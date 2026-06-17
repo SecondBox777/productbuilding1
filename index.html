@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>술게임 벌칙 뽑기</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f4ee;
+        --panel: #fffaf2;
+        --panel-strong: #ffffff;
+        --text: #1f2328;
+        --muted: #6b6258;
+        --line: #ded5c7;
+        --accent: #d6413a;
+        --accent-dark: #aa2d29;
+        --blue: #315f8f;
+        --green: #2f7555;
+        --shadow: 0 18px 50px rgba(62, 43, 27, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top left, rgba(214, 65, 58, 0.12), transparent 28rem),
+          linear-gradient(135deg, #f7f4ee 0%, #ebe5dc 100%);
+        color: var(--text);
+        font-family:
+          Inter, Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      .app {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .logo {
+        display: grid;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        font-size: 25px;
+        font-weight: 800;
+        box-shadow: 0 10px 24px rgba(214, 65, 58, 0.28);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(26px, 4vw, 42px);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .subtitle {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .responsible {
+        max-width: 360px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+        text-align: right;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+        gap: 20px;
+      }
+
+      .picker,
+      .editor,
+      .history {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 250, 242, 0.9);
+        box-shadow: var(--shadow);
+      }
+
+      .picker {
+        min-height: 560px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        overflow: hidden;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .segmented {
+        display: inline-grid;
+        grid-template-columns: repeat(4, minmax(64px, 1fr));
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f3ecdf;
+      }
+
+      .segmented button {
+        min-height: 38px;
+        padding: 0 12px;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .segmented button.active {
+        background: var(--panel-strong);
+        color: var(--text);
+        box-shadow: 0 3px 12px rgba(83, 65, 44, 0.12);
+      }
+
+      .select-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 48px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-strong);
+      }
+
+      .select-wrap span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      select {
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        outline: none;
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        place-items: center;
+        padding: 34px;
+        text-align: center;
+      }
+
+      .result-box {
+        width: min(100%, 610px);
+        min-height: 270px;
+        display: grid;
+        place-items: center;
+        padding: 34px;
+        border: 1px solid #ead8c8;
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 247, 234, 0.88)),
+          repeating-linear-gradient(45deg, rgba(214, 65, 58, 0.06) 0 10px, transparent 10px 20px);
+      }
+
+      .result-kicker {
+        margin: 0 0 12px;
+        color: var(--accent-dark);
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .result {
+        margin: 0;
+        overflow-wrap: anywhere;
+        font-size: clamp(34px, 7vw, 72px);
+        font-weight: 900;
+        line-height: 1.04;
+        letter-spacing: 0;
+      }
+
+      .result-meta {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .draw-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px;
+        border-top: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.48);
+      }
+
+      .draw {
+        flex: 1;
+        min-height: 58px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        font-size: 20px;
+        font-weight: 850;
+        box-shadow: 0 12px 22px rgba(214, 65, 58, 0.26);
+      }
+
+      .draw:active {
+        transform: translateY(1px);
+      }
+
+      .ghost {
+        width: 58px;
+        min-height: 58px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-strong);
+        color: var(--text);
+        font-size: 22px;
+      }
+
+      .side {
+        display: grid;
+        gap: 20px;
+      }
+
+      .editor,
+      .history {
+        padding: 18px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+
+      .count {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .form {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 96px;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .form input,
+      .form select {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 0 12px;
+        color: var(--text);
+        outline: none;
+      }
+
+      .add {
+        grid-column: 1 / -1;
+        min-height: 44px;
+        border-radius: 8px;
+        background: var(--blue);
+        color: white;
+        font-weight: 780;
+      }
+
+      .penalty-list,
+      .history-list {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .penalty-item,
+      .history-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 48px;
+        padding: 10px 10px 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel-strong);
+      }
+
+      .penalty-text {
+        min-width: 0;
+      }
+
+      .penalty-name {
+        overflow-wrap: anywhere;
+        font-weight: 720;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 22px;
+        margin-top: 5px;
+        padding: 0 8px;
+        border-radius: 999px;
+        color: white;
+        font-size: 12px;
+        font-weight: 760;
+      }
+
+      .tag.light {
+        background: var(--green);
+      }
+
+      .tag.medium {
+        background: var(--blue);
+      }
+
+      .tag.hot {
+        background: var(--accent);
+      }
+
+      .remove {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #f1e7dc;
+        color: var(--muted);
+        font-size: 20px;
+      }
+
+      .history-item {
+        grid-template-columns: auto minmax(0, 1fr);
+        color: var(--muted);
+      }
+
+      .history-rank {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 8px;
+        background: #f1e7dc;
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .empty {
+        padding: 20px;
+        border: 1px dashed var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0;
+        pointer-events: none;
+        padding: 12px 16px;
+        border-radius: 8px;
+        background: #1f2328;
+        color: white;
+        transition: 180ms ease;
+      }
+
+      .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+
+      @media (max-width: 860px) {
+        .app {
+          width: min(100% - 22px, 680px);
+          padding: 20px 0;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .responsible {
+          max-width: none;
+          text-align: left;
+        }
+
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .picker {
+          min-height: 500px;
+        }
+
+        .stage {
+          padding: 22px;
+        }
+
+        .result-box {
+          min-height: 230px;
+          padding: 22px;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .controls,
+        .draw-row,
+        .editor,
+        .history {
+          padding: 14px;
+        }
+
+        .segmented {
+          width: 100%;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .select-wrap {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .form {
+          grid-template-columns: 1fr;
+        }
+
+        .draw-row {
+          grid-template-columns: 1fr auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">!</div>
+          <div>
+            <h1>술게임 벌칙 뽑기</h1>
+            <p class="subtitle">친구들이랑 바로 쓰는 랜덤 벌칙 보드</p>
+          </div>
+        </div>
+        <p class="responsible">과음 강요 없이, 모두가 동의한 벌칙만 넣고 즐겨주세요.</p>
+      </header>
+
+      <section class="layout" aria-label="벌칙 뽑기 앱">
+        <div class="picker">
+          <div class="controls">
+            <div class="segmented" aria-label="강도 필터">
+              <button class="active" type="button" data-filter="all">전체</button>
+              <button type="button" data-filter="light">순한맛</button>
+              <button type="button" data-filter="medium">보통</button>
+              <button type="button" data-filter="hot">매운맛</button>
+            </div>
+            <label class="select-wrap">
+              <span>연출</span>
+              <select id="mode">
+                <option value="fast">빠르게</option>
+                <option value="drama">쫄깃하게</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="stage" aria-live="polite">
+            <div class="result-box">
+              <div>
+                <p class="result-kicker" id="resultKicker">Ready</p>
+                <p class="result" id="result">벌칙 뽑기</p>
+                <p class="result-meta" id="resultMeta">버튼을 누르면 오늘의 벌칙이 나옵니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="draw-row">
+            <button class="draw" id="draw" type="button">뽑기</button>
+            <button class="ghost" id="reset" type="button" title="기본 벌칙으로 초기화" aria-label="기본 벌칙으로 초기화">↻</button>
+          </div>
+        </div>
+
+        <aside class="side">
+          <section class="editor" aria-label="벌칙 편집">
+            <div class="section-head">
+              <h2>벌칙 목록</h2>
+              <span class="count" id="count">0개</span>
+            </div>
+            <form class="form" id="form">
+              <input id="penaltyInput" maxlength="40" placeholder="새 벌칙 입력" autocomplete="off" />
+              <select id="levelInput" aria-label="벌칙 강도">
+                <option value="light">순한맛</option>
+                <option value="medium">보통</option>
+                <option value="hot">매운맛</option>
+              </select>
+              <button class="add" type="submit">추가</button>
+            </form>
+            <ul class="penalty-list" id="penaltyList"></ul>
+          </section>
+
+          <section class="history" aria-label="최근 뽑은 벌칙">
+            <div class="section-head">
+              <h2>최근 결과</h2>
+              <span class="count" id="historyCount">0회</span>
+            </div>
+            <ul class="history-list" id="historyList"></ul>
+          </section>
+        </aside>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+      const defaults = [
+        { text: "옆 사람 칭찬 세 가지", level: "light" },
+        { text: "물 한 컵 마시기", level: "light" },
+        { text: "10초 동안 포즈 유지", level: "light" },
+        { text: "최근 사진첩 아무 사진 설명하기", level: "medium" },
+        { text: "지목한 사람과 가위바위보 패자는 한 모금", level: "medium" },
+        { text: "아무 노래 후렴 한 소절 부르기", level: "medium" },
+        { text: "30초 동안 존댓말만 쓰기", level: "hot" },
+        { text: "랜덤 연락처 이름 보고 추억 말하기", level: "hot" },
+        { text: "다음 라운드까지 금지어 하나 정하기", level: "hot" },
+      ];
+
+      const labels = {
+        light: "순한맛",
+        medium: "보통",
+        hot: "매운맛",
+      };
+
+      const state = {
+        filter: "all",
+        penalties: loadPenalties(),
+        history: [],
+        drawing: false,
+      };
+
+      const result = document.querySelector("#result");
+      const resultKicker = document.querySelector("#resultKicker");
+      const resultMeta = document.querySelector("#resultMeta");
+      const drawButton = document.querySelector("#draw");
+      const resetButton = document.querySelector("#reset");
+      const penaltyList = document.querySelector("#penaltyList");
+      const historyList = document.querySelector("#historyList");
+      const count = document.querySelector("#count");
+      const historyCount = document.querySelector("#historyCount");
+      const form = document.querySelector("#form");
+      const input = document.querySelector("#penaltyInput");
+      const levelInput = document.querySelector("#levelInput");
+      const mode = document.querySelector("#mode");
+      const toast = document.querySelector("#toast");
+      const filterButtons = [...document.querySelectorAll("[data-filter]")];
+
+      function loadPenalties() {
+        try {
+          const saved = JSON.parse(localStorage.getItem("penalties") || "null");
+          if (Array.isArray(saved) && saved.length) {
+            return saved;
+          }
+        } catch {
+          localStorage.removeItem("penalties");
+        }
+        return [...defaults];
+      }
+
+      function savePenalties() {
+        localStorage.setItem("penalties", JSON.stringify(state.penalties));
+      }
+
+      function filteredPenalties() {
+        if (state.filter === "all") {
+          return state.penalties;
+        }
+        return state.penalties.filter((item) => item.level === state.filter);
+      }
+
+      function pickRandom(items) {
+        return items[Math.floor(Math.random() * items.length)];
+      }
+
+      function render() {
+        const visible = filteredPenalties();
+        count.textContent = `${visible.length}/${state.penalties.length}개`;
+        filterButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.filter === state.filter);
+        });
+
+        penaltyList.innerHTML = "";
+        if (!state.penalties.length) {
+          penaltyList.innerHTML = '<li class="empty">벌칙을 추가해주세요.</li>';
+        } else {
+          state.penalties.forEach((item, index) => {
+            const li = document.createElement("li");
+            li.className = "penalty-item";
+            li.innerHTML = `
+              <div class="penalty-text">
+                <div class="penalty-name"></div>
+                <span class="tag ${item.level}">${labels[item.level]}</span>
+              </div>
+              <button class="remove" type="button" aria-label="벌칙 삭제">×</button>
+            `;
+            li.querySelector(".penalty-name").textContent = item.text;
+            li.querySelector(".remove").addEventListener("click", () => removePenalty(index));
+            penaltyList.append(li);
+          });
+        }
+
+        historyCount.textContent = `${state.history.length}회`;
+        historyList.innerHTML = "";
+        if (!state.history.length) {
+          historyList.innerHTML = '<li class="empty">아직 뽑은 벌칙이 없습니다.</li>';
+        } else {
+          state.history.slice(0, 5).forEach((item, index) => {
+            const li = document.createElement("li");
+            li.className = "history-item";
+            li.innerHTML = `<span class="history-rank">${index + 1}</span><span></span>`;
+            li.querySelector("span:last-child").textContent = item.text;
+            historyList.append(li);
+          });
+        }
+      }
+
+      function addPenalty(event) {
+        event.preventDefault();
+        const text = input.value.trim();
+        if (!text) {
+          showToast("벌칙 내용을 입력해주세요.");
+          input.focus();
+          return;
+        }
+        state.penalties.unshift({ text, level: levelInput.value });
+        input.value = "";
+        savePenalties();
+        render();
+        showToast("벌칙을 추가했습니다.");
+      }
+
+      function removePenalty(index) {
+        const [removed] = state.penalties.splice(index, 1);
+        savePenalties();
+        render();
+        showToast(`${removed.text} 삭제`);
+      }
+
+      function setResult(item) {
+        result.textContent = item.text;
+        resultKicker.textContent = labels[item.level];
+        resultMeta.textContent = `현재 필터: ${state.filter === "all" ? "전체" : labels[state.filter]}`;
+      }
+
+      function drawPenalty() {
+        if (state.drawing) return;
+        const items = filteredPenalties();
+        if (!items.length) {
+          showToast("선택한 강도에 벌칙이 없습니다.");
+          return;
+        }
+
+        state.drawing = true;
+        drawButton.disabled = true;
+        const duration = mode.value === "drama" ? 1600 : 650;
+        const started = Date.now();
+        const spin = window.setInterval(() => {
+          setResult(pickRandom(items));
+          if (Date.now() - started > duration) {
+            window.clearInterval(spin);
+            const selected = pickRandom(items);
+            setResult(selected);
+            state.history.unshift(selected);
+            state.history = state.history.slice(0, 10);
+            state.drawing = false;
+            drawButton.disabled = false;
+            render();
+          }
+        }, 82);
+      }
+
+      function resetDefaults() {
+        state.penalties = [...defaults];
+        state.filter = "all";
+        state.history = [];
+        savePenalties();
+        result.textContent = "벌칙 뽑기";
+        resultKicker.textContent = "Ready";
+        resultMeta.textContent = "버튼을 누르면 오늘의 벌칙이 나옵니다.";
+        render();
+        showToast("기본 벌칙으로 초기화했습니다.");
+      }
+
+      let toastTimer;
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1600);
+      }
+
+      filterButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          state.filter = button.dataset.filter;
+          render();
+        });
+      });
+
+      form.addEventListener("submit", addPenalty);
+      drawButton.addEventListener("click", drawPenalty);
+      resetButton.addEventListener("click", resetDefaults);
+      render();
+    </script>
+  </body>
+</html>
