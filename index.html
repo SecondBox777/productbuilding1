@@ -38,7 +38,8 @@
 
       button,
       input,
-      select {
+      select,
+      textarea {
         font: inherit;
       }
 
@@ -110,7 +111,8 @@
 
       .picker,
       .editor,
-      .history {
+      .history,
+      .challenge {
         border: 1px solid var(--line);
         border-radius: 8px;
         background: rgba(255, 250, 242, 0.9);
@@ -267,6 +269,69 @@
       .editor,
       .history {
         padding: 18px;
+      }
+
+      .challenge {
+        margin-top: 20px;
+        padding: 22px;
+      }
+
+      .challenge-copy {
+        margin: 6px 0 18px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .challenge-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 7px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      .field span {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .field input,
+      .field textarea {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        padding: 0 12px;
+        color: var(--text);
+        outline: none;
+      }
+
+      .field textarea {
+        min-height: 108px;
+        resize: vertical;
+        padding: 12px;
+        line-height: 1.45;
+      }
+
+      .send {
+        grid-column: 1 / -1;
+        min-height: 50px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        font-size: 17px;
+        font-weight: 850;
+        box-shadow: 0 12px 22px rgba(214, 65, 58, 0.22);
       }
 
       .section-head {
@@ -462,7 +527,8 @@
         .controls,
         .draw-row,
         .editor,
-        .history {
+        .history,
+        .challenge {
           padding: 14px;
         }
 
@@ -477,6 +543,10 @@
         }
 
         .form {
+          grid-template-columns: 1fr;
+        }
+
+        .challenge-form {
           grid-template-columns: 1fr;
         }
 
@@ -559,6 +629,29 @@
             <ul class="history-list" id="historyList"></ul>
           </section>
         </aside>
+      </section>
+
+      <section class="challenge" aria-labelledby="challengeTitle">
+        <div class="section-head">
+          <h2 id="challengeTitle">맞짱신청서</h2>
+        </div>
+        <p class="challenge-copy">원하는 벌칙 대결, 참가자, 연락처를 남기면 신청서가 전송됩니다.</p>
+        <form class="challenge-form" action="https://formspree.io/f/xdavqkvk" method="POST">
+          <input type="hidden" name="_subject" value="맞짱신청서 도착" />
+          <label class="field">
+            <span>신청자</span>
+            <input name="name" type="text" autocomplete="name" required />
+          </label>
+          <label class="field">
+            <span>연락처</span>
+            <input name="contact" type="text" autocomplete="tel" required />
+          </label>
+          <label class="field full">
+            <span>맞짱 내용</span>
+            <textarea name="message" placeholder="예: 3판 2선승 벌칙 뽑기, 참가자 4명" required></textarea>
+          </label>
+          <button class="send" type="submit">신청서 보내기</button>
+        </form>
       </section>
     </main>
 
