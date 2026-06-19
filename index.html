@@ -112,7 +112,8 @@
       .picker,
       .editor,
       .history,
-      .challenge {
+      .challenge,
+      .comments {
         border: 1px solid var(--line);
         border-radius: 8px;
         background: rgba(255, 250, 242, 0.9);
@@ -272,6 +273,11 @@
       }
 
       .challenge {
+        margin-top: 20px;
+        padding: 22px;
+      }
+
+      .comments {
         margin-top: 20px;
         padding: 22px;
       }
@@ -528,7 +534,8 @@
         .draw-row,
         .editor,
         .history,
-        .challenge {
+        .challenge,
+        .comments {
           padding: 14px;
         }
 
@@ -652,6 +659,13 @@
           </label>
           <button class="send" type="submit">아이디어 보내기</button>
         </form>
+      </section>
+
+      <section class="comments" aria-labelledby="commentsTitle">
+        <div class="section-head">
+          <h2 id="commentsTitle">댓글</h2>
+        </div>
+        <div id="disqus_thread"></div>
       </section>
     </main>
 
@@ -852,5 +866,23 @@
       resetButton.addEventListener("click", resetDefaults);
       render();
     </script>
+    <script>
+      var disqus_config = function () {
+        this.page.url = window.location.href.split("#")[0];
+        this.page.identifier = window.location.pathname || "home";
+      };
+
+      (function () {
+        var d = document;
+        var s = d.createElement("script");
+        s.src = "https://productbuilding-1.disqus.com/embed.js";
+        s.setAttribute("data-timestamp", +new Date());
+        (d.head || d.body).appendChild(s);
+      })();
+    </script>
+    <noscript>
+      JavaScript를 활성화하면
+      <a href="https://disqus.com/?ref_noscript">Disqus 댓글</a>을 볼 수 있습니다.
+    </noscript>
   </body>
 </html>
