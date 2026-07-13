@@ -7,16 +7,16 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f4f0ea;
-        --surface: #fffdf8;
-        --surface-strong: #ffffff;
-        --text: #202124;
-        --muted: #68635c;
-        --line: #ded5c8;
-        --teto: #e24d3f;
-        --egen: #2d7dd2;
-        --accent: #1f7a64;
-        --shadow: 0 22px 70px rgba(45, 38, 30, 0.14);
+        --bg: #f6f6f3;
+        --surface: #ffffff;
+        --surface-soft: #eeeeea;
+        --text: #151515;
+        --muted: #686866;
+        --line: #1f1f1d;
+        --line-soft: #d7d7d1;
+        --teto: #d94b3d;
+        --egen: #276dc2;
+        --accent: #151515;
       }
 
       * {
@@ -27,9 +27,10 @@
         margin: 0;
         min-height: 100vh;
         background:
-          linear-gradient(135deg, rgba(226, 77, 63, 0.16), transparent 32%),
-          linear-gradient(225deg, rgba(45, 125, 210, 0.16), transparent 34%),
+          linear-gradient(90deg, rgba(21, 21, 21, 0.035) 1px, transparent 1px),
+          linear-gradient(rgba(21, 21, 21, 0.035) 1px, transparent 1px),
           var(--bg);
+        background-size: 28px 28px;
         color: var(--text);
         font-family:
           Pretendard, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -47,117 +48,131 @@
       }
 
       .app {
-        width: min(1120px, calc(100% - 32px));
+        width: min(1180px, calc(100% - 32px));
         margin: 0 auto;
-        padding: 32px 0;
+        padding: 28px 0;
       }
 
       .shell {
         display: grid;
-        grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
-        gap: 20px;
+        grid-template-columns: minmax(0, 0.88fr) minmax(380px, 1.12fr);
+        gap: 16px;
         align-items: stretch;
+        border: 1px solid var(--line);
+        background: var(--surface);
       }
 
       .intro,
       .analyzer {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: rgba(255, 253, 248, 0.88);
-        box-shadow: var(--shadow);
+        background: var(--surface);
       }
 
       .intro {
         display: grid;
-        min-height: 640px;
+        grid-template-rows: 1fr auto;
+        min-height: 680px;
         overflow: hidden;
+        border-right: 1px solid var(--line);
       }
 
       .visual {
         position: relative;
-        min-height: 310px;
+        min-height: 360px;
         background:
-          radial-gradient(circle at 48% 28%, #fff 0 7%, transparent 7.4%),
-          radial-gradient(circle at 35% 42%, rgba(226, 77, 63, 0.9) 0 5%, transparent 5.4%),
-          radial-gradient(circle at 63% 42%, rgba(45, 125, 210, 0.9) 0 5%, transparent 5.4%),
-          radial-gradient(circle at 50% 49%, #f4c7a1 0 23%, transparent 23.4%),
-          linear-gradient(120deg, rgba(226, 77, 63, 0.28), rgba(45, 125, 210, 0.28));
+          linear-gradient(90deg, transparent 49.8%, var(--line) 49.8% 50.2%, transparent 50.2%),
+          linear-gradient(transparent 49.8%, var(--line) 49.8% 50.2%, transparent 50.2%),
+          var(--surface-soft);
         border-bottom: 1px solid var(--line);
       }
 
       .visual::before,
       .visual::after {
         position: absolute;
-        top: 42%;
-        width: 28%;
-        height: 46%;
-        border: 2px solid rgba(32, 33, 36, 0.18);
-        border-radius: 50% 50% 44% 44%;
-        background: rgba(255, 255, 255, 0.24);
+        border: 1px solid var(--line);
+        background: var(--surface);
         content: "";
       }
 
       .visual::before {
-        left: 17%;
-        transform: rotate(-10deg);
+        left: 12%;
+        top: 18%;
+        width: 56%;
+        height: 58%;
+        transform: none;
       }
 
       .visual::after {
-        right: 17%;
-        transform: rotate(10deg);
+        right: 12%;
+        bottom: 16%;
+        width: 44%;
+        height: 42%;
+        background:
+          linear-gradient(90deg, transparent 49%, var(--line-soft) 49% 51%, transparent 51%),
+          linear-gradient(transparent 49%, var(--line-soft) 49% 51%, transparent 51%),
+          #f8f8f5;
+        background-size: 22px 22px;
+        transform: none;
       }
 
       .scan-line {
         position: absolute;
-        left: 11%;
-        right: 11%;
-        top: 48%;
-        height: 3px;
-        border-radius: 999px;
-        background: linear-gradient(90deg, transparent, rgba(31, 122, 100, 0.86), transparent);
-        box-shadow: 0 0 24px rgba(31, 122, 100, 0.45);
+        left: 12%;
+        right: 12%;
+        top: 52%;
+        z-index: 2;
+        height: 1px;
+        background: var(--line);
       }
 
       .intro-copy {
-        padding: 30px;
+        padding: 28px;
       }
 
       h1 {
         margin: 0;
-        font-size: clamp(36px, 6vw, 64px);
-        line-height: 1.02;
+        max-width: 8.5em;
+        font-size: clamp(40px, 6vw, 72px);
+        font-weight: 850;
+        line-height: 0.98;
         letter-spacing: 0;
       }
 
       .subtitle {
-        margin: 16px 0 0;
+        max-width: 440px;
+        margin: 22px 0 0;
         color: var(--muted);
-        font-size: 17px;
-        line-height: 1.65;
+        font-size: 15px;
+        line-height: 1.75;
       }
 
       .badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 24px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        margin-top: 28px;
+        border: 1px solid var(--line);
       }
 
       .badge {
         display: inline-flex;
         align-items: center;
-        min-height: 34px;
-        padding: 0 12px;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        background: var(--surface-strong);
-        color: var(--muted);
-        font-size: 13px;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 10px;
+        border-right: 1px solid var(--line);
+        background: var(--surface);
+        color: var(--text);
+        font-size: 12px;
         font-weight: 700;
+        text-align: center;
+      }
+
+      .badge:last-child {
+        border-right: 0;
       }
 
       .analyzer {
-        padding: 22px;
+        padding: 28px;
       }
 
       .panel-title {
@@ -165,30 +180,42 @@
         justify-content: space-between;
         gap: 16px;
         align-items: center;
-        margin-bottom: 16px;
+        margin-bottom: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line);
       }
 
       h2 {
         margin: 0;
-        font-size: 24px;
+        font-size: 22px;
+        font-weight: 820;
         letter-spacing: 0;
       }
 
       .status {
-        color: var(--muted);
-        font-size: 13px;
+        min-height: 28px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 700;
         white-space: nowrap;
       }
 
       .upload-zone {
         position: relative;
         display: grid;
-        min-height: 330px;
+        min-height: 380px;
         place-items: center;
         padding: 20px;
-        border: 2px dashed #cfc3b5;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(90deg, rgba(21, 21, 21, 0.045) 1px, transparent 1px),
+          linear-gradient(rgba(21, 21, 21, 0.045) 1px, transparent 1px),
+          #f8f8f5;
+        background-size: 18px 18px;
         text-align: center;
         transition:
           border-color 160ms ease,
@@ -198,38 +225,38 @@
 
       .upload-zone.dragging {
         border-color: var(--accent);
-        background: rgba(31, 122, 100, 0.08);
+        background-color: #efefeb;
         transform: translateY(-1px);
       }
 
       .upload-zone.has-image {
         padding: 0;
-        border-style: solid;
-        background: #151515;
+        background: #111;
       }
 
       .upload-empty {
         display: grid;
-        gap: 14px;
+        gap: 12px;
         justify-items: center;
         color: var(--muted);
       }
 
       .upload-icon {
         display: grid;
-        width: 78px;
-        height: 78px;
+        width: 86px;
+        height: 86px;
         place-items: center;
-        border-radius: 50%;
-        background: #ebe4da;
+        border: 1px solid var(--line);
+        background: var(--surface);
         color: var(--text);
-        font-size: 34px;
-        font-weight: 900;
+        font-size: 38px;
+        font-weight: 300;
       }
 
       .upload-empty strong {
         color: var(--text);
-        font-size: 20px;
+        font-size: 18px;
+        font-weight: 820;
       }
 
       #image-preview {
@@ -237,7 +264,6 @@
         width: 100%;
         max-height: 430px;
         object-fit: contain;
-        border-radius: 6px;
       }
 
       .upload-zone.has-image #image-preview {
@@ -258,15 +284,15 @@
       .actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 14px;
+        gap: 0;
+        margin-top: 12px;
+        border: 1px solid var(--line);
       }
 
       .primary,
       .secondary {
-        min-height: 48px;
-        border-radius: 8px;
-        font-weight: 800;
+        min-height: 52px;
+        font-weight: 820;
       }
 
       .primary {
@@ -281,17 +307,16 @@
       }
 
       .secondary {
-        border: 1px solid var(--line);
-        background: var(--surface-strong);
+        border-left: 1px solid var(--line);
+        background: var(--surface);
         color: var(--text);
       }
 
       .result-card {
-        margin-top: 16px;
-        padding: 18px;
+        margin-top: 12px;
+        padding: 20px;
         border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--surface-strong);
+        background: var(--surface);
       }
 
       .result-main {
@@ -304,23 +329,23 @@
 
       .result-label {
         color: var(--muted);
-        font-size: 13px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
+        font-size: 11px;
+        font-weight: 820;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
       }
 
       #winner {
-        margin-top: 4px;
-        font-size: clamp(34px, 5vw, 54px);
-        font-weight: 950;
+        margin-top: 8px;
+        font-size: clamp(42px, 6vw, 68px);
+        font-weight: 900;
         line-height: 1;
       }
 
       #confidence {
-        color: var(--muted);
-        font-size: 28px;
-        font-weight: 900;
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 850;
         white-space: nowrap;
       }
 
@@ -343,24 +368,25 @@
       }
 
       .meter {
-        height: 13px;
+        height: 16px;
         overflow: hidden;
-        border-radius: 999px;
-        background: #eee7dd;
+        border: 1px solid var(--line);
+        background: var(--surface-soft);
       }
 
       .meter-fill {
         width: 0%;
         height: 100%;
-        border-radius: inherit;
         background: var(--accent);
         transition: width 240ms ease;
       }
 
       .note {
-        margin: 14px 0 0;
+        margin: 16px 0 0;
+        padding-top: 14px;
+        border-top: 1px solid var(--line-soft);
         color: var(--muted);
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.5;
       }
 
@@ -371,19 +397,22 @@
       @media (max-width: 860px) {
         .app {
           width: min(100% - 24px, 620px);
-          padding: 18px 0;
+          padding: 12px 0;
         }
 
         .shell {
           grid-template-columns: 1fr;
+          gap: 0;
         }
 
         .intro {
           min-height: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
         }
 
         .visual {
-          min-height: 220px;
+          min-height: 230px;
         }
 
         .intro-copy,
@@ -410,6 +439,19 @@
 
         .upload-zone {
           min-height: 270px;
+        }
+
+        .badges {
+          grid-template-columns: 1fr;
+        }
+
+        .badge {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .badge:last-child {
+          border-bottom: 0;
         }
       }
     </style>
