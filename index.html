@@ -615,6 +615,7 @@
           fail: "모델 로드 실패",
           needModel: "모델 파일 필요",
           complete: "분석 완료!",
+          verdict: "당신은 '{type}' 입니다.",
           modelError: "모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.",
           labels: {
             teto: "테토",
@@ -644,10 +645,11 @@
           fail: "Model failed",
           needModel: "Model needed",
           complete: "Analysis complete!",
+          verdict: "You are '{type}'.",
           modelError: "The model could not be loaded. Please check the Teachable Machine model URL.",
           labels: {
-            teto: "Teto",
-            egen: "Egen",
+            teto: "Teto (Masculine)",
+            egen: "Egen (Soft)",
           },
         },
       };
@@ -742,17 +744,12 @@
         return "var(--accent)";
       }
 
-      function buildSummary(predictions) {
-        const items = [...predictions]
-          .sort((a, b) => {
-            const order = { egen: 0, teto: 1 };
-            const aKey = getClassKey(a.className);
-            const bKey = getClassKey(b.className);
-            return (order[aKey] ?? 2) - (order[bKey] ?? 2);
-          })
-          .map((prediction) => `${getDisplayClassName(prediction.className)} ${Math.round(prediction.probability * 100)}%`);
+      function buildSummary() {
+        return t("complete");
+      }
 
-        return `${t("complete")} ${items.join(" / ")}`;
+      function buildVerdict(className) {
+        return t("verdict").replace("{type}", getDisplayClassName(className));
       }
 
       function renderPredictions(predictions) {
@@ -761,8 +758,8 @@
         const top = sorted[0];
         const percent = Math.round(top.probability * 100);
 
-        resultSummary.textContent = buildSummary(predictions);
-        winner.textContent = getDisplayClassName(top.className);
+        resultSummary.textContent = buildSummary();
+        winner.textContent = buildVerdict(top.className);
         winner.style.color = getResultColor(top.className);
         confidence.textContent = percent + "%";
         labelContainer.innerHTML = "";
