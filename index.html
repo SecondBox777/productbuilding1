@@ -7,16 +7,28 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f6f6f3;
-        --surface: #ffffff;
-        --surface-soft: #eeeeea;
-        --text: #151515;
-        --muted: #686866;
-        --line: #1f1f1d;
-        --line-soft: #d7d7d1;
-        --teto: #d94b3d;
-        --egen: #276dc2;
-        --accent: #151515;
+        --bg: #f4f0ea;
+        --surface: #fffdf8;
+        --surface-strong: #ffffff;
+        --text: #202124;
+        --muted: #68635c;
+        --line: #ded5c8;
+        --teto: #e24d3f;
+        --egen: #2d7dd2;
+        --accent: #1f7a64;
+        --shadow: 0 22px 70px rgba(45, 38, 30, 0.14);
+      }
+
+      body.dark {
+        color-scheme: dark;
+        --bg: #151719;
+        --surface: #202326;
+        --surface-strong: #262a2e;
+        --text: #f4f0e8;
+        --muted: #b7afa5;
+        --line: #3a3f44;
+        --accent: #48a585;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
       }
 
       * {
@@ -27,10 +39,9 @@
         margin: 0;
         min-height: 100vh;
         background:
-          linear-gradient(90deg, rgba(21, 21, 21, 0.035) 1px, transparent 1px),
-          linear-gradient(rgba(21, 21, 21, 0.035) 1px, transparent 1px),
+          linear-gradient(135deg, rgba(226, 77, 63, 0.16), transparent 32%),
+          linear-gradient(225deg, rgba(45, 125, 210, 0.16), transparent 34%),
           var(--bg);
-        background-size: 28px 28px;
         color: var(--text);
         font-family:
           Pretendard, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -48,131 +59,135 @@
       }
 
       .app {
-        width: min(1180px, calc(100% - 32px));
+        width: min(1120px, calc(100% - 32px));
         margin: 0 auto;
-        padding: 28px 0;
+        padding: 32px 0;
+      }
+
+      .utility-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .utility-button {
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-strong);
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 800;
       }
 
       .shell {
         display: grid;
-        grid-template-columns: minmax(0, 0.88fr) minmax(380px, 1.12fr);
-        gap: 16px;
+        grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+        gap: 20px;
         align-items: stretch;
-        border: 1px solid var(--line);
-        background: var(--surface);
       }
 
       .intro,
       .analyzer {
-        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 253, 248, 0.88);
+        box-shadow: var(--shadow);
       }
 
       .intro {
         display: grid;
-        grid-template-rows: 1fr auto;
-        min-height: 680px;
+        min-height: 640px;
         overflow: hidden;
-        border-right: 1px solid var(--line);
       }
 
       .visual {
         position: relative;
-        min-height: 360px;
+        min-height: 310px;
         background:
-          linear-gradient(90deg, transparent 49.8%, var(--line) 49.8% 50.2%, transparent 50.2%),
-          linear-gradient(transparent 49.8%, var(--line) 49.8% 50.2%, transparent 50.2%),
-          var(--surface-soft);
+          radial-gradient(circle at 48% 28%, #fff 0 7%, transparent 7.4%),
+          radial-gradient(circle at 35% 42%, rgba(226, 77, 63, 0.9) 0 5%, transparent 5.4%),
+          radial-gradient(circle at 63% 42%, rgba(45, 125, 210, 0.9) 0 5%, transparent 5.4%),
+          radial-gradient(circle at 50% 49%, #f4c7a1 0 23%, transparent 23.4%),
+          linear-gradient(120deg, rgba(226, 77, 63, 0.28), rgba(45, 125, 210, 0.28));
         border-bottom: 1px solid var(--line);
       }
 
       .visual::before,
       .visual::after {
         position: absolute;
-        border: 1px solid var(--line);
-        background: var(--surface);
+        top: 42%;
+        width: 28%;
+        height: 46%;
+        border: 2px solid rgba(32, 33, 36, 0.18);
+        border-radius: 50% 50% 44% 44%;
+        background: rgba(255, 255, 255, 0.24);
         content: "";
       }
 
       .visual::before {
-        left: 12%;
-        top: 18%;
-        width: 56%;
-        height: 58%;
-        transform: none;
+        left: 17%;
+        transform: rotate(-10deg);
       }
 
       .visual::after {
-        right: 12%;
-        bottom: 16%;
-        width: 44%;
-        height: 42%;
-        background:
-          linear-gradient(90deg, transparent 49%, var(--line-soft) 49% 51%, transparent 51%),
-          linear-gradient(transparent 49%, var(--line-soft) 49% 51%, transparent 51%),
-          #f8f8f5;
-        background-size: 22px 22px;
-        transform: none;
+        right: 17%;
+        transform: rotate(10deg);
       }
 
       .scan-line {
         position: absolute;
-        left: 12%;
-        right: 12%;
-        top: 52%;
-        z-index: 2;
-        height: 1px;
-        background: var(--line);
+        left: 11%;
+        right: 11%;
+        top: 48%;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, transparent, rgba(31, 122, 100, 0.86), transparent);
+        box-shadow: 0 0 24px rgba(31, 122, 100, 0.45);
       }
 
       .intro-copy {
-        padding: 28px;
+        padding: 30px;
       }
 
       h1 {
         margin: 0;
-        max-width: 8.5em;
-        font-size: clamp(40px, 6vw, 72px);
-        font-weight: 850;
-        line-height: 0.98;
+        font-size: clamp(36px, 6vw, 64px);
+        line-height: 1.02;
         letter-spacing: 0;
       }
 
       .subtitle {
-        max-width: 440px;
-        margin: 22px 0 0;
+        margin: 16px 0 0;
         color: var(--muted);
-        font-size: 15px;
-        line-height: 1.75;
+        font-size: 17px;
+        line-height: 1.65;
       }
 
       .badges {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0;
-        margin-top: 28px;
-        border: 1px solid var(--line);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 24px;
       }
 
       .badge {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        min-height: 42px;
-        padding: 0 10px;
-        border-right: 1px solid var(--line);
-        background: var(--surface);
-        color: var(--text);
-        font-size: 12px;
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-strong);
+        color: var(--muted);
+        font-size: 13px;
         font-weight: 700;
-        text-align: center;
-      }
-
-      .badge:last-child {
-        border-right: 0;
       }
 
       .analyzer {
-        padding: 28px;
+        padding: 22px;
       }
 
       .panel-title {
@@ -180,42 +195,30 @@
         justify-content: space-between;
         gap: 16px;
         align-items: center;
-        margin-bottom: 18px;
-        padding-bottom: 18px;
-        border-bottom: 1px solid var(--line);
+        margin-bottom: 16px;
       }
 
       h2 {
         margin: 0;
-        font-size: 22px;
-        font-weight: 820;
+        font-size: 24px;
         letter-spacing: 0;
       }
 
       .status {
-        min-height: 28px;
-        display: inline-flex;
-        align-items: center;
-        padding: 0 10px;
-        border: 1px solid var(--line);
-        color: var(--text);
-        font-size: 12px;
-        font-weight: 700;
+        color: var(--muted);
+        font-size: 13px;
         white-space: nowrap;
       }
 
       .upload-zone {
         position: relative;
         display: grid;
-        min-height: 380px;
+        min-height: 330px;
         place-items: center;
         padding: 20px;
-        border: 1px solid var(--line);
-        background:
-          linear-gradient(90deg, rgba(21, 21, 21, 0.045) 1px, transparent 1px),
-          linear-gradient(rgba(21, 21, 21, 0.045) 1px, transparent 1px),
-          #f8f8f5;
-        background-size: 18px 18px;
+        border: 2px dashed #cfc3b5;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.62);
         text-align: center;
         transition:
           border-color 160ms ease,
@@ -225,38 +228,38 @@
 
       .upload-zone.dragging {
         border-color: var(--accent);
-        background-color: #efefeb;
+        background: rgba(31, 122, 100, 0.08);
         transform: translateY(-1px);
       }
 
       .upload-zone.has-image {
         padding: 0;
-        background: #111;
+        border-style: solid;
+        background: #151515;
       }
 
       .upload-empty {
         display: grid;
-        gap: 12px;
+        gap: 14px;
         justify-items: center;
         color: var(--muted);
       }
 
       .upload-icon {
         display: grid;
-        width: 86px;
-        height: 86px;
+        width: 78px;
+        height: 78px;
         place-items: center;
-        border: 1px solid var(--line);
-        background: var(--surface);
+        border-radius: 50%;
+        background: #ebe4da;
         color: var(--text);
-        font-size: 38px;
-        font-weight: 300;
+        font-size: 34px;
+        font-weight: 900;
       }
 
       .upload-empty strong {
         color: var(--text);
-        font-size: 18px;
-        font-weight: 820;
+        font-size: 20px;
       }
 
       #image-preview {
@@ -264,6 +267,7 @@
         width: 100%;
         max-height: 430px;
         object-fit: contain;
+        border-radius: 6px;
       }
 
       .upload-zone.has-image #image-preview {
@@ -272,6 +276,48 @@
 
       .upload-zone.has-image .upload-empty {
         display: none;
+      }
+
+      .analysis-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: none;
+        place-items: center;
+        border-radius: 6px;
+        background: rgba(18, 20, 22, 0.72);
+        color: white;
+        text-align: center;
+      }
+
+      .analysis-overlay.active {
+        display: grid;
+      }
+
+      .analysis-box {
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+      }
+
+      .analysis-spinner {
+        width: 44px;
+        height: 44px;
+        border: 4px solid rgba(255, 255, 255, 0.28);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 900ms linear infinite;
+      }
+
+      .analysis-text {
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       #file-input {
@@ -284,15 +330,15 @@
       .actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 0;
-        margin-top: 12px;
-        border: 1px solid var(--line);
+        gap: 10px;
+        margin-top: 14px;
       }
 
       .primary,
       .secondary {
-        min-height: 52px;
-        font-weight: 820;
+        min-height: 48px;
+        border-radius: 8px;
+        font-weight: 800;
       }
 
       .primary {
@@ -307,16 +353,17 @@
       }
 
       .secondary {
-        border-left: 1px solid var(--line);
-        background: var(--surface);
+        border: 1px solid var(--line);
+        background: var(--surface-strong);
         color: var(--text);
       }
 
       .result-card {
-        margin-top: 12px;
-        padding: 20px;
+        margin-top: 16px;
+        padding: 18px;
         border: 1px solid var(--line);
-        background: var(--surface);
+        border-radius: 8px;
+        background: var(--surface-strong);
       }
 
       .result-main {
@@ -329,23 +376,31 @@
 
       .result-label {
         color: var(--muted);
-        font-size: 11px;
-        font-weight: 820;
-        letter-spacing: 0.12em;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
-      #winner {
-        margin-top: 8px;
-        font-size: clamp(42px, 6vw, 68px);
+      #result-summary {
+        margin: 0 0 14px;
+        color: var(--text);
+        font-size: 18px;
         font-weight: 900;
+        line-height: 1.4;
+      }
+
+      #winner {
+        margin-top: 4px;
+        font-size: clamp(34px, 5vw, 54px);
+        font-weight: 950;
         line-height: 1;
       }
 
       #confidence {
-        color: var(--text);
-        font-size: 34px;
-        font-weight: 850;
+        color: var(--muted);
+        font-size: 28px;
+        font-weight: 900;
         white-space: nowrap;
       }
 
@@ -368,25 +423,24 @@
       }
 
       .meter {
-        height: 16px;
+        height: 13px;
         overflow: hidden;
-        border: 1px solid var(--line);
-        background: var(--surface-soft);
+        border-radius: 999px;
+        background: #eee7dd;
       }
 
       .meter-fill {
         width: 0%;
         height: 100%;
+        border-radius: inherit;
         background: var(--accent);
         transition: width 240ms ease;
       }
 
       .note {
-        margin: 16px 0 0;
-        padding-top: 14px;
-        border-top: 1px solid var(--line-soft);
+        margin: 14px 0 0;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
         line-height: 1.5;
       }
 
@@ -397,22 +451,19 @@
       @media (max-width: 860px) {
         .app {
           width: min(100% - 24px, 620px);
-          padding: 12px 0;
+          padding: 18px 0;
         }
 
         .shell {
           grid-template-columns: 1fr;
-          gap: 0;
         }
 
         .intro {
           min-height: auto;
-          border-right: 0;
-          border-bottom: 1px solid var(--line);
         }
 
         .visual {
-          min-height: 230px;
+          min-height: 220px;
         }
 
         .intro-copy,
@@ -440,38 +491,29 @@
         .upload-zone {
           min-height: 270px;
         }
-
-        .badges {
-          grid-template-columns: 1fr;
-        }
-
-        .badge {
-          border-right: 0;
-          border-bottom: 1px solid var(--line);
-        }
-
-        .badge:last-child {
-          border-bottom: 0;
-        }
       }
     </style>
   </head>
   <body>
     <main class="app">
+      <div class="utility-bar" aria-label="site options">
+        <button class="utility-button" id="theme-toggle" type="button">Dark mode</button>
+        <button class="utility-button" id="language-toggle" type="button">English</button>
+      </div>
       <section class="shell" aria-label="테토 에겐 얼굴 분석기">
         <aside class="intro">
           <div class="visual" aria-hidden="true">
             <div class="scan-line"></div>
           </div>
           <div class="intro-copy">
-            <h1>테토/에겐 얼굴 분석기</h1>
-            <p class="subtitle">
+            <h1 data-i18n="title">테토/에겐 얼굴 분석기</h1>
+            <p class="subtitle" data-i18n="subtitle">
               얼굴 사진을 업로드하면 Teachable Machine 이미지 모델이 사진을 읽고 테토형인지
               에겐형인지 확률로 보여줍니다.
             </p>
             <div class="badges" aria-label="분석 특징">
               <span class="badge">Teachable Machine</span>
-              <span class="badge">사진 업로드</span>
+              <span class="badge" data-i18n="badgeUpload">사진 업로드</span>
               <span class="badge">테토 vs 에겐</span>
             </div>
           </div>
@@ -479,35 +521,42 @@
 
         <section class="analyzer">
           <div class="panel-title">
-            <h2>사진 분석</h2>
-            <span class="status" id="model-status">모델 대기 중</span>
+            <h2 data-i18n="panelTitle">사진 분석</h2>
+            <span class="status" id="model-status" data-status="idle">모델 대기 중</span>
           </div>
 
           <label class="upload-zone" id="upload-zone" for="file-input">
             <img id="image-preview" alt="업로드한 얼굴 사진 미리보기" />
             <span class="upload-empty">
               <span class="upload-icon">+</span>
-              <strong>얼굴 사진 업로드</strong>
-              <span>JPG, PNG, WEBP 이미지를 선택하거나 끌어다 놓으세요.</span>
+              <strong data-i18n="uploadTitle">얼굴 사진 업로드</strong>
+              <span data-i18n="uploadHelp">JPG, PNG, WEBP 이미지를 선택하거나 끌어다 놓으세요.</span>
+            </span>
+            <span class="analysis-overlay" id="analysis-overlay" aria-live="polite">
+              <span class="analysis-box">
+                <span class="analysis-spinner" aria-hidden="true"></span>
+                <span class="analysis-text" data-i18n="analyzing">분석중...</span>
+              </span>
             </span>
             <input id="file-input" type="file" accept="image/*" />
           </label>
 
           <div class="actions">
-            <button class="primary" id="analyze-button" type="button" disabled>분석하기</button>
-            <button class="secondary" id="reset-button" type="button" disabled>다시 선택</button>
+            <button class="primary" id="analyze-button" type="button" disabled data-i18n="analyzeButton">분석하기</button>
+            <button class="secondary" id="reset-button" type="button" disabled data-i18n="resetButton">다시 선택</button>
           </div>
 
           <article class="result-card hidden" id="result-card" aria-live="polite">
             <div class="result-main">
               <div>
                 <div class="result-label">Result</div>
+                <p id="result-summary">분석 완료!</p>
                 <div id="winner">-</div>
               </div>
               <div id="confidence">0%</div>
             </div>
             <div class="meter-list" id="label-container"></div>
-            <p class="note">
+            <p class="note" data-i18n="note">
               이 결과는 업로드한 Teachable Machine 모델의 학습 데이터 기준 예측이며,
               실제 성격이나 정체성을 판단하는 용도가 아닙니다.
             </p>
@@ -524,6 +573,8 @@
       let model;
       let selectedImage;
       let maxPredictions = 0;
+      let currentLanguage = "ko";
+      let latestPredictions = null;
 
       const modelStatus = document.getElementById("model-status");
       const uploadZone = document.getElementById("upload-zone");
@@ -532,14 +583,117 @@
       const analyzeButton = document.getElementById("analyze-button");
       const resetButton = document.getElementById("reset-button");
       const resultCard = document.getElementById("result-card");
+      const resultSummary = document.getElementById("result-summary");
       const winner = document.getElementById("winner");
       const confidence = document.getElementById("confidence");
       const labelContainer = document.getElementById("label-container");
+      const analysisOverlay = document.getElementById("analysis-overlay");
+      const themeToggle = document.getElementById("theme-toggle");
+      const languageToggle = document.getElementById("language-toggle");
+
+      const copy = {
+        ko: {
+          title: "테토/에겐 얼굴 분석기",
+          subtitle:
+            "얼굴 사진을 업로드하면 Teachable Machine 이미지 모델이 사진을 읽고 테토형인지 에겐형인지 확률로 보여줍니다.",
+          badgeUpload: "사진 업로드",
+          panelTitle: "사진 분석",
+          uploadTitle: "얼굴 사진 업로드",
+          uploadHelp: "JPG, PNG, WEBP 이미지를 선택하거나 끌어다 놓으세요.",
+          analyzing: "분석중...",
+          analyzeButton: "분석하기",
+          analyzingButton: "분석 중",
+          resetButton: "다시 선택",
+          note:
+            "이 결과는 업로드한 Teachable Machine 모델의 학습 데이터 기준 예측이며, 실제 성격이나 정체성을 판단하는 용도가 아닙니다.",
+          darkMode: "Dark mode",
+          lightMode: "Light mode",
+          languageToggle: "English",
+          idle: "모델 대기 중",
+          loading: "모델 불러오는 중",
+          ready: "모델 준비 완료",
+          fail: "모델 로드 실패",
+          needModel: "모델 파일 필요",
+          complete: "분석 완료!",
+          modelError: "모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.",
+          labels: {
+            teto: "테토",
+            egen: "에겐",
+          },
+        },
+        en: {
+          title: "Teto/Egen Face Analyzer",
+          subtitle:
+            "Upload a face photo and the Teachable Machine image model will estimate whether it looks closer to Teto or Egen.",
+          badgeUpload: "Photo upload",
+          panelTitle: "Photo analysis",
+          uploadTitle: "Upload a face photo",
+          uploadHelp: "Choose or drag in a JPG, PNG, or WEBP image.",
+          analyzing: "Analyzing...",
+          analyzeButton: "Analyze",
+          analyzingButton: "Analyzing",
+          resetButton: "Choose again",
+          note:
+            "This result is only a prediction from the uploaded Teachable Machine model. It is not a real judgment of personality or identity.",
+          darkMode: "Dark mode",
+          lightMode: "Light mode",
+          languageToggle: "한국어",
+          idle: "Model standby",
+          loading: "Loading model",
+          ready: "Model ready",
+          fail: "Model failed",
+          needModel: "Model needed",
+          complete: "Analysis complete!",
+          modelError: "The model could not be loaded. Please check the Teachable Machine model URL.",
+          labels: {
+            teto: "Teto",
+            egen: "Egen",
+          },
+        },
+      };
+
+      function t(key) {
+        return copy[currentLanguage][key];
+      }
+
+      function setStatus(key) {
+        modelStatus.dataset.status = key;
+        modelStatus.textContent = t(key);
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms));
+      }
+
+      function getClassKey(className) {
+        const normalized = className.toLowerCase();
+        if (normalized.includes("테토") || normalized.includes("teto")) return "teto";
+        if (normalized.includes("에겐") || normalized.includes("egen")) return "egen";
+        return null;
+      }
+
+      function getDisplayClassName(className) {
+        const key = getClassKey(className);
+        return key ? copy[currentLanguage].labels[key] : className;
+      }
+
+      function applyLanguage() {
+        document.documentElement.lang = currentLanguage;
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          element.textContent = t(element.dataset.i18n);
+        });
+        languageToggle.textContent = t("languageToggle");
+        themeToggle.textContent = document.body.classList.contains("dark") ? t("lightMode") : t("darkMode");
+        setStatus(modelStatus.dataset.status || "idle");
+        if (latestPredictions && !resultCard.classList.contains("hidden")) {
+          renderPredictions(latestPredictions);
+        }
+      }
 
       async function loadModel() {
         if (model) return model;
 
-        modelStatus.textContent = "모델 불러오는 중";
+        setStatus("loading");
         analyzeButton.disabled = true;
 
         const modelURL = MODEL_URL + "model.json";
@@ -548,7 +702,7 @@
         model = await tmImage.load(modelURL, metadataURL);
         maxPredictions = model.getTotalClasses();
 
-        modelStatus.textContent = "모델 준비 완료";
+        setStatus("ready");
         analyzeButton.disabled = !selectedImage;
         return model;
       }
@@ -564,6 +718,7 @@
           analyzeButton.disabled = !model;
           resetButton.disabled = false;
           resultCard.classList.add("hidden");
+          analysisOverlay.classList.remove("active");
         };
         imagePreview.src = imageURL;
       }
@@ -576,21 +731,38 @@
         analyzeButton.disabled = true;
         resetButton.disabled = true;
         resultCard.classList.add("hidden");
+        analysisOverlay.classList.remove("active");
+        latestPredictions = null;
       }
 
       function getResultColor(className) {
-        const normalized = className.toLowerCase();
-        if (normalized.includes("테토") || normalized.includes("teto")) return "var(--teto)";
-        if (normalized.includes("에겐") || normalized.includes("egen")) return "var(--egen)";
+        const key = getClassKey(className);
+        if (key === "teto") return "var(--teto)";
+        if (key === "egen") return "var(--egen)";
         return "var(--accent)";
       }
 
+      function buildSummary(predictions) {
+        const items = [...predictions]
+          .sort((a, b) => {
+            const order = { egen: 0, teto: 1 };
+            const aKey = getClassKey(a.className);
+            const bKey = getClassKey(b.className);
+            return (order[aKey] ?? 2) - (order[bKey] ?? 2);
+          })
+          .map((prediction) => `${getDisplayClassName(prediction.className)} ${Math.round(prediction.probability * 100)}%`);
+
+        return `${t("complete")} ${items.join(" / ")}`;
+      }
+
       function renderPredictions(predictions) {
+        latestPredictions = predictions;
         const sorted = [...predictions].sort((a, b) => b.probability - a.probability);
         const top = sorted[0];
         const percent = Math.round(top.probability * 100);
 
-        winner.textContent = top.className;
+        resultSummary.textContent = buildSummary(predictions);
+        winner.textContent = getDisplayClassName(top.className);
         winner.style.color = getResultColor(top.className);
         confidence.textContent = percent + "%";
         labelContainer.innerHTML = "";
@@ -603,7 +775,7 @@
           topLine.className = "meter-top";
 
           const name = document.createElement("span");
-          name.textContent = prediction.className;
+          name.textContent = getDisplayClassName(prediction.className);
 
           const value = document.createElement("span");
           value.textContent = Math.round(prediction.probability * 100) + "%";
@@ -630,17 +802,20 @@
 
         try {
           analyzeButton.disabled = true;
-          analyzeButton.textContent = "분석 중";
+          analyzeButton.textContent = t("analyzingButton");
+          analysisOverlay.classList.add("active");
+          resultCard.classList.add("hidden");
           await loadModel();
 
-          const predictions = await model.predict(selectedImage);
+          const [predictions] = await Promise.all([model.predict(selectedImage), sleep(1400)]);
           renderPredictions(predictions);
         } catch (error) {
           console.error(error);
-          modelStatus.textContent = "모델 로드 실패";
-          alert("모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.");
+          setStatus("fail");
+          alert(t("modelError"));
         } finally {
-          analyzeButton.textContent = "분석하기";
+          analysisOverlay.classList.remove("active");
+          analyzeButton.textContent = t("analyzeButton");
           analyzeButton.disabled = !selectedImage || !model;
         }
       }
@@ -666,10 +841,20 @@
 
       analyzeButton.addEventListener("click", analyzeImage);
       resetButton.addEventListener("click", resetImage);
+      themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        themeToggle.textContent = document.body.classList.contains("dark") ? t("lightMode") : t("darkMode");
+      });
+      languageToggle.addEventListener("click", () => {
+        currentLanguage = currentLanguage === "ko" ? "en" : "ko";
+        applyLanguage();
+      });
+
+      applyLanguage();
 
       loadModel().catch((error) => {
         console.error(error);
-        modelStatus.textContent = "모델 파일 필요";
+        setStatus("needModel");
       });
     </script>
   </body>
