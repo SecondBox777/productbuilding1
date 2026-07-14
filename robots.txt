@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://productbuilding1.pepermint916.workers.dev/sitemap.xml
