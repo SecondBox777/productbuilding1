@@ -636,6 +636,8 @@
       let maxPredictions = 0;
       let currentLanguage = "ko";
       let latestPredictions = null;
+      let latestShareFile = null;
+      let shareCardPromise = null;
 
       const modelStatus = document.getElementById("model-status");
       const uploadZone = document.getElementById("upload-zone");
@@ -684,7 +686,6 @@
           shareIntro: "내 테토/에겐 얼굴 분석 결과는",
           preparingShare: "공유 카드 만드는 중",
           protectedPhoto: "개인정보 보호를 위해 사진을 블러 처리했어요",
-          imageCopied: "결과 카드를 복사했어요. 메신저에 붙여넣어 공유해 보세요.",
           imageSaved: "결과 카드 이미지를 저장했어요. 메신저에서 공유해 보세요.",
           shareFailed: "공유하지 못했습니다. 잠시 후 다시 시도해 주세요.",
           modelError: "모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.",
@@ -694,9 +695,9 @@
           },
         },
         en: {
-          title: "Teto/Egen Face Analyzer",
+          title: "Teto (Masculine)/Egen (Feminine) Face Analyzer",
           subtitle:
-            "Upload a face photo and the Teachable Machine image model will estimate whether it looks closer to Teto or Egen.",
+            "Upload a face photo and the Teachable Machine image model will estimate whether it looks closer to Teto (Masculine) or Egen (Feminine).",
           badgeUpload: "Photo upload",
           panelTitle: "Photo analysis",
           uploadTitle: "Upload a face photo",
@@ -722,13 +723,12 @@
           shareIntro: "My Teto/Egen face analysis result is",
           preparingShare: "Creating share card",
           protectedPhoto: "Photo blurred to protect your privacy",
-          imageCopied: "Result card copied. Paste it into a messenger to share.",
           imageSaved: "Result card saved. Share the image from your messenger.",
           shareFailed: "Could not share the result. Please try again.",
           modelError: "The model could not be loaded. Please check the Teachable Machine model URL.",
           labels: {
             teto: "Teto (Masculine)",
-            egen: "Egen (Soft)",
+            egen: "Egen (Feminine)",
           },
         },
       };
@@ -767,6 +767,7 @@
         themeToggle.textContent = document.body.classList.contains("dark") ? t("lightMode") : t("darkMode");
         setStatus(modelStatus.dataset.status || "idle");
         if (latestPredictions && !resultCard.classList.contains("hidden")) {
+          invalidateShareCard();
           renderPredictions(latestPredictions);
         } else {
           analyzeButton.textContent = t("analyzeButton");
@@ -784,6 +785,11 @@
         analyzeButton.dataset.action = action;
         analyzeButton.textContent = t(action === "share" ? "shareButton" : "analyzeButton");
         analyzeButton.classList.toggle("share-ready", action === "share");
+      }
+
+      function invalidateShareCard() {
+        latestShareFile = null;
+        shareCardPromise = null;
       }
 
       async function loadModel() {
@@ -816,6 +822,7 @@
           resultCard.classList.add("hidden");
           analysisOverlay.classList.remove("active");
           latestPredictions = null;
+          invalidateShareCard();
           setPrimaryAction("analyze");
         };
         imagePreview.src = imageURL;
@@ -831,6 +838,7 @@
         resultCard.classList.add("hidden");
         analysisOverlay.classList.remove("active");
         latestPredictions = null;
+        invalidateShareCard();
         setPrimaryAction("analyze");
       }
 
@@ -890,6 +898,7 @@
 
         resultCard.classList.remove("hidden");
         setPrimaryAction("share");
+        prepareShareCard().catch((error) => console.error(error));
       }
 
       function buildShareData() {
@@ -1038,14 +1047,24 @@
         });
       }
 
-      async function shareResultFallback(blob) {
-        if (navigator.clipboard && window.ClipboardItem && window.isSecureContext) {
-          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-          showToast(t("imageCopied"));
-          return;
-        }
+      function prepareShareCard() {
+        if (latestShareFile) return Promise.resolve(latestShareFile);
+        if (shareCardPromise) return shareCardPromise;
 
-        const imageURL = URL.createObjectURL(blob);
+        shareCardPromise = createResultCardBlob()
+          .then((blob) => {
+            latestShareFile = new File([blob], "teto-egen-result.png", { type: "image/png" });
+            return latestShareFile;
+          })
+          .catch((error) => {
+            shareCardPromise = null;
+            throw error;
+          });
+        return shareCardPromise;
+      }
+
+      function saveShareCard(file) {
+        const imageURL = URL.createObjectURL(file);
         const link = document.createElement("a");
         link.href = imageURL;
         link.download = "teto-egen-result.png";
@@ -1060,31 +1079,32 @@
         if (!latestPredictions || !selectedImage) return;
 
         const shareData = buildShareData();
-        let blob;
         analyzeButton.disabled = true;
-        analyzeButton.textContent = t("preparingShare");
         try {
-          blob = await createResultCardBlob();
-          const file = new File([blob], "teto-egen-result.png", { type: "image/png" });
-          const fileShareData = { ...shareData, files: [file] };
+          let file = latestShareFile;
+          if (!file) {
+            analyzeButton.textContent = t("preparingShare");
+            file = await prepareShareCard();
+          }
+
+          const fileShareData = {
+            files: [file],
+            title: shareData.title,
+            text: shareData.text,
+          };
           const canShareFile = navigator.share &&
             (!navigator.canShare || navigator.canShare({ files: [file] }));
 
           if (canShareFile) {
             await navigator.share(fileShareData);
           } else {
-            await shareResultFallback(blob);
+            saveShareCard(file);
           }
         } catch (error) {
           if (error.name !== "AbortError") {
             console.error(error);
-            if (blob) {
-              try {
-                await shareResultFallback(blob);
-              } catch (fallbackError) {
-                console.error(fallbackError);
-                showToast(t("shareFailed"));
-              }
+            if (latestShareFile) {
+              saveShareCard(latestShareFile);
             } else {
               showToast(t("shareFailed"));
             }
@@ -1107,6 +1127,7 @@
 
           const [predictions] = await Promise.all([model.predict(selectedImage), sleep(1400)]);
           renderPredictions(predictions);
+          await prepareShareCard();
         } catch (error) {
           console.error(error);
           setStatus("fail");
