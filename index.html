@@ -642,8 +642,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.8/kakao.min.js"></script>
     <script>
       const MODEL_URL = "https://teachablemachine.withgoogle.com/models/60Qfr43G1/";
+      const KAKAO_JAVASCRIPT_KEY = "e1c11e474de0a15027cfb31de1260803";
 
       let model;
       let selectedImage;
@@ -699,9 +701,11 @@
           shareTitle: "테토/에겐 얼굴 분석 결과",
           shareIntro: "내 테토/에겐 얼굴 분석 결과는",
           preparingShare: "공유 카드 만드는 중",
+          kakaoSharing: "카카오톡 공유 준비 중",
           protectedPhoto: "개인정보 보호를 위해 사진을 블러 처리했어요",
           imageSaved: "결과 카드 이미지를 저장했어요. 메신저에서 공유해 보세요.",
           desktopShared: "결과 PNG를 다운로드하고 판정 문구를 복사했어요. 카카오톡에서 Ctrl+V로 문구를 붙인 뒤 + 버튼으로 PNG를 첨부하세요.",
+          kakaoSetupError: "카카오 공유를 열지 못했어요. 카카오 Developers의 Web 플랫폼에 현재 사이트 도메인이 등록됐는지 확인해 주세요.",
           shareFailed: "공유하지 못했습니다. 잠시 후 다시 시도해 주세요.",
           modelError: "모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.",
           labels: {
@@ -737,9 +741,11 @@
           shareTitle: "Teto/Egen face analysis result",
           shareIntro: "My Teto/Egen face analysis result is",
           preparingShare: "Creating share card",
+          kakaoSharing: "Preparing KakaoTalk share",
           protectedPhoto: "Photo blurred to protect your privacy",
           imageSaved: "Result card saved. Share the image from your messenger.",
           desktopShared: "Result PNG downloaded and result text copied. Paste the text with Ctrl+V, then attach the PNG in your messenger.",
+          kakaoSetupError: "Could not open KakaoTalk sharing. Check that this site domain is registered in Kakao Developers Web platform settings.",
           shareFailed: "Could not share the result. Please try again.",
           modelError: "The model could not be loaded. Please check the Teachable Machine model URL.",
           labels: {
@@ -751,6 +757,12 @@
 
       function t(key) {
         return copy[currentLanguage][key];
+      }
+
+      function initializeKakao() {
+        if (!window.Kakao) return false;
+        if (!Kakao.isInitialized()) Kakao.init(KAKAO_JAVASCRIPT_KEY);
+        return Kakao.isInitialized();
       }
 
       function setStatus(key) {
@@ -1123,6 +1135,49 @@
         showToast(t("desktopShared"), 6500);
       }
 
+      async function shareResultWithKakao(file) {
+        if (!initializeKakao()) throw new Error("Kakao SDK initialization failed");
+
+        analyzeButton.textContent = t("kakaoSharing");
+        const uploaded = await Kakao.Share.uploadImage({ file: [file] });
+        const imageUrl = uploaded?.infos?.original?.url;
+        if (!imageUrl) throw new Error("Kakao image upload failed");
+
+        const sorted = [...latestPredictions].sort((a, b) => b.probability - a.probability);
+        const top = sorted[0];
+        const percent = Math.round(top.probability * 100);
+        const type = getDisplayClassName(top.className);
+        const siteUrl = window.location.origin + window.location.pathname;
+
+        Kakao.Share.sendDefault({
+          objectType: "feed",
+          content: {
+            title: currentLanguage === "ko"
+              ? `내 분석 결과는 ${type} ${percent}%!`
+              : `My result is ${type} ${percent}%!`,
+            description: currentLanguage === "ko"
+              ? "블러 처리된 사진과 전체 분석 결과를 확인해 보세요."
+              : "See the privacy-blurred photo and full analysis result.",
+            imageUrl,
+            imageWidth: 1200,
+            imageHeight: 1500,
+            link: {
+              mobileWebUrl: siteUrl,
+              webUrl: siteUrl,
+            },
+          },
+          buttons: [
+            {
+              title: currentLanguage === "ko" ? "나도 검사하기" : "Try the analyzer",
+              link: {
+                mobileWebUrl: siteUrl,
+                webUrl: siteUrl,
+              },
+            },
+          ],
+        });
+      }
+
       async function shareResult() {
         if (!latestPredictions || !selectedImage) return;
 
@@ -1133,6 +1188,11 @@
           if (!file) {
             analyzeButton.textContent = t("preparingShare");
             file = await prepareShareCard();
+          }
+
+          if (initializeKakao()) {
+            await shareResultWithKakao(file);
+            return;
           }
 
           const fileShareData = {
@@ -1151,17 +1211,7 @@
         } catch (error) {
           if (error.name !== "AbortError") {
             console.error(error);
-            if (latestShareFile) {
-              try {
-                await shareResultOnDesktop(latestShareFile, shareData);
-              } catch (fallbackError) {
-                console.error(fallbackError);
-                saveShareCard(latestShareFile);
-                showToast(t("imageSaved"));
-              }
-            } else {
-              showToast(t("shareFailed"));
-            }
+            showToast(window.Kakao ? t("kakaoSetupError") : t("shareFailed"), 6500);
           }
         } finally {
           analyzeButton.disabled = false;
