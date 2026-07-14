@@ -444,6 +444,30 @@
         line-height: 1.5;
       }
 
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 28px;
+        z-index: 10;
+        max-width: calc(100% - 32px);
+        padding: 12px 16px;
+        border-radius: 8px;
+        background: var(--text);
+        box-shadow: var(--shadow);
+        color: var(--surface-strong);
+        font-size: 14px;
+        font-weight: 800;
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, 12px);
+        transition: opacity 180ms ease, transform 180ms ease;
+      }
+
+      .toast.visible {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
       .hidden {
         display: none;
       }
@@ -565,6 +589,8 @@
       </section>
     </main>
 
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script>
@@ -590,6 +616,8 @@
       const analysisOverlay = document.getElementById("analysis-overlay");
       const themeToggle = document.getElementById("theme-toggle");
       const languageToggle = document.getElementById("language-toggle");
+      const toast = document.getElementById("toast");
+      let toastTimer;
 
       const copy = {
         ko: {
@@ -603,6 +631,7 @@
           analyzing: "분석중...",
           analyzeButton: "분석하기",
           analyzingButton: "분석 중",
+          shareButton: "결과 공유하기",
           resetButton: "다시 선택",
           note:
             "이 결과는 업로드한 Teachable Machine 모델의 학습 데이터 기준 예측이며, 실제 성격이나 정체성을 판단하는 용도가 아닙니다.",
@@ -616,6 +645,10 @@
           needModel: "모델 파일 필요",
           complete: "분석 완료!",
           verdict: "당신은 '{type}' 입니다.",
+          shareTitle: "테토/에겐 얼굴 분석 결과",
+          shareIntro: "내 테토/에겐 얼굴 분석 결과는",
+          copied: "결과와 링크를 복사했어요. 메신저에 붙여넣어 공유해 보세요.",
+          shareFailed: "공유하지 못했습니다. 잠시 후 다시 시도해 주세요.",
           modelError: "모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.",
           labels: {
             teto: "테토",
@@ -633,6 +666,7 @@
           analyzing: "Analyzing...",
           analyzeButton: "Analyze",
           analyzingButton: "Analyzing",
+          shareButton: "Share result",
           resetButton: "Choose again",
           note:
             "This result is only a prediction from the uploaded Teachable Machine model. It is not a real judgment of personality or identity.",
@@ -646,6 +680,10 @@
           needModel: "Model needed",
           complete: "Analysis complete!",
           verdict: "You are '{type}'.",
+          shareTitle: "Teto/Egen face analysis result",
+          shareIntro: "My Teto/Egen face analysis result is",
+          copied: "Result and link copied. Paste them into a messenger to share.",
+          shareFailed: "Could not share the result. Please try again.",
           modelError: "The model could not be loaded. Please check the Teachable Machine model URL.",
           labels: {
             teto: "Teto (Masculine)",
@@ -689,7 +727,21 @@
         setStatus(modelStatus.dataset.status || "idle");
         if (latestPredictions && !resultCard.classList.contains("hidden")) {
           renderPredictions(latestPredictions);
+        } else {
+          analyzeButton.textContent = t("analyzeButton");
         }
+      }
+
+      function showToast(message) {
+        window.clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add("visible");
+        toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 3200);
+      }
+
+      function setPrimaryAction(action) {
+        analyzeButton.dataset.action = action;
+        analyzeButton.textContent = t(action === "share" ? "shareButton" : "analyzeButton");
       }
 
       async function loadModel() {
@@ -721,6 +773,8 @@
           resetButton.disabled = false;
           resultCard.classList.add("hidden");
           analysisOverlay.classList.remove("active");
+          latestPredictions = null;
+          setPrimaryAction("analyze");
         };
         imagePreview.src = imageURL;
       }
@@ -735,6 +789,7 @@
         resultCard.classList.add("hidden");
         analysisOverlay.classList.remove("active");
         latestPredictions = null;
+        setPrimaryAction("analyze");
       }
 
       function getResultColor(className) {
@@ -792,6 +847,65 @@
         });
 
         resultCard.classList.remove("hidden");
+        setPrimaryAction("share");
+      }
+
+      function buildShareData() {
+        const sorted = [...latestPredictions].sort((a, b) => b.probability - a.probability);
+        const top = sorted[0];
+        const percent = Math.round(top.probability * 100);
+        const text = `${t("shareIntro")} ${getDisplayClassName(top.className)} (${percent}%)!`;
+
+        return {
+          title: t("shareTitle"),
+          text,
+          url: window.location.href,
+        };
+      }
+
+      async function copyShareData(shareData) {
+        const content = `${shareData.text}\n${shareData.url}`;
+
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(content);
+          return;
+        }
+
+        const textArea = document.createElement("textarea");
+        textArea.value = content;
+        textArea.setAttribute("readonly", "");
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        const copied = document.execCommand("copy");
+        textArea.remove();
+        if (!copied) throw new Error("Clipboard copy failed");
+      }
+
+      async function shareResult() {
+        if (!latestPredictions) return;
+
+        const shareData = buildShareData();
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else {
+            await copyShareData(shareData);
+            showToast(t("copied"));
+          }
+        } catch (error) {
+          if (error.name !== "AbortError") {
+            console.error(error);
+            try {
+              await copyShareData(shareData);
+              showToast(t("copied"));
+            } catch (copyError) {
+              console.error(copyError);
+              showToast(t("shareFailed"));
+            }
+          }
+        }
       }
 
       async function analyzeImage() {
@@ -812,7 +926,7 @@
           alert(t("modelError"));
         } finally {
           analysisOverlay.classList.remove("active");
-          analyzeButton.textContent = t("analyzeButton");
+          setPrimaryAction(latestPredictions ? "share" : "analyze");
           analyzeButton.disabled = !selectedImage || !model;
         }
       }
@@ -836,7 +950,13 @@
         setImage(event.dataTransfer.files[0]);
       });
 
-      analyzeButton.addEventListener("click", analyzeImage);
+      analyzeButton.addEventListener("click", () => {
+        if (analyzeButton.dataset.action === "share") {
+          shareResult();
+        } else {
+          analyzeImage();
+        }
+      });
       resetButton.addEventListener("click", resetImage);
       themeToggle.addEventListener("click", () => {
         document.body.classList.toggle("dark");
@@ -847,6 +967,7 @@
         applyLanguage();
       });
 
+      setPrimaryAction("analyze");
       applyLanguage();
 
       loadModel().catch((error) => {
