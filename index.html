@@ -506,6 +506,88 @@
         transform: translate(-50%, 0);
       }
 
+      .share-dialog {
+        width: min(420px, calc(100% - 32px));
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface-strong);
+        box-shadow: var(--shadow);
+        color: var(--text);
+      }
+
+      .share-dialog::backdrop {
+        background: rgba(16, 18, 20, 0.58);
+        backdrop-filter: blur(3px);
+      }
+
+      .share-dialog-content {
+        padding: 22px;
+      }
+
+      .share-dialog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .share-dialog-title {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .share-dialog-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .share-options {
+        display: grid;
+        gap: 10px;
+      }
+
+      .share-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 58px;
+        padding: 10px 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        font-weight: 800;
+        text-align: left;
+      }
+
+      .share-option:hover,
+      .share-option:focus-visible {
+        border-color: var(--accent);
+        outline: none;
+      }
+
+      .share-option-icon {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        place-items: center;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 900;
+      }
+
+      .share-option-icon.kakao { background: #fee500; color: #191919; }
+      .share-option-icon.whatsapp { background: #25d366; }
+
       .hidden {
         display: none;
       }
@@ -640,6 +722,25 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <dialog class="share-dialog" id="share-dialog" aria-labelledby="share-dialog-title">
+      <div class="share-dialog-content">
+        <div class="share-dialog-header">
+          <h2 class="share-dialog-title" id="share-dialog-title" data-i18n="shareMenuTitle">공유 방법 선택</h2>
+          <button class="share-dialog-close" id="share-dialog-close" type="button" aria-label="닫기">×</button>
+        </div>
+        <div class="share-options">
+          <button class="share-option" id="share-kakao" type="button">
+            <span class="share-option-icon kakao" aria-hidden="true">K</span>
+            <span data-i18n="shareKakao">카카오톡으로 공유하기</span>
+          </button>
+          <button class="share-option" id="share-whatsapp" type="button">
+            <span class="share-option-icon whatsapp" aria-hidden="true">W</span>
+            <span data-i18n="shareWhatsApp">왓츠앱으로 공유하기</span>
+          </button>
+        </div>
+      </div>
+    </dialog>
+
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.8/kakao.min.js"></script>
@@ -671,6 +772,10 @@
       const themeToggle = document.getElementById("theme-toggle");
       const languageToggle = document.getElementById("language-toggle");
       const toast = document.getElementById("toast");
+      const shareDialog = document.getElementById("share-dialog");
+      const shareDialogClose = document.getElementById("share-dialog-close");
+      const shareKakaoButton = document.getElementById("share-kakao");
+      const shareWhatsAppButton = document.getElementById("share-whatsapp");
       let toastTimer;
 
       const copy = {
@@ -686,6 +791,9 @@
           analyzeButton: "분석하기",
           analyzingButton: "분석 중",
           shareButton: "결과 공유하기",
+          shareMenuTitle: "공유 방법 선택",
+          shareKakao: "카카오톡으로 공유하기",
+          shareWhatsApp: "왓츠앱으로 공유하기",
           resetButton: "다시 선택",
           note:
             "이 결과는 업로드한 Teachable Machine 모델의 학습 데이터 기준 예측이며, 실제 성격이나 정체성을 판단하는 용도가 아닙니다.",
@@ -726,6 +834,9 @@
           analyzeButton: "Analyze",
           analyzingButton: "Analyzing",
           shareButton: "Share result",
+          shareMenuTitle: "Choose how to share",
+          shareKakao: "Share via KakaoTalk",
+          shareWhatsApp: "Share via WhatsApp",
           resetButton: "Choose again",
           note:
             "This result is only a prediction from the uploaded Teachable Machine model. It is not a real judgment of personality or identity.",
@@ -1170,10 +1281,37 @@
         });
       }
 
-      async function shareResult() {
+      function openShareMenu() {
+        if (!latestPredictions || !selectedImage) return;
+        if (typeof shareDialog.showModal === "function") {
+          shareDialog.showModal();
+        } else {
+          shareDialog.setAttribute("open", "");
+        }
+      }
+
+      function closeShareMenu() {
+        if (typeof shareDialog.close === "function") {
+          shareDialog.close();
+        } else {
+          shareDialog.removeAttribute("open");
+        }
+      }
+
+      function shareResultWithWhatsApp() {
+        if (!latestPredictions || !selectedImage) return;
+        const shareData = buildShareData();
+        const message = `${shareData.text}\n${shareData.url}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        closeShareMenu();
+        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      }
+
+      async function shareResultWithKakaoFlow() {
         if (!latestPredictions || !selectedImage) return;
 
         const shareData = buildShareData();
+        closeShareMenu();
         analyzeButton.disabled = true;
         try {
           let file = latestShareFile;
@@ -1256,10 +1394,16 @@
 
       analyzeButton.addEventListener("click", () => {
         if (analyzeButton.dataset.action === "share") {
-          shareResult();
+          openShareMenu();
         } else {
           analyzeImage();
         }
+      });
+      shareDialogClose.addEventListener("click", closeShareMenu);
+      shareKakaoButton.addEventListener("click", shareResultWithKakaoFlow);
+      shareWhatsAppButton.addEventListener("click", shareResultWithWhatsApp);
+      shareDialog.addEventListener("click", (event) => {
+        if (event.target === shareDialog) closeShareMenu();
       });
       resetButton.addEventListener("click", resetImage);
       themeToggle.addEventListener("click", () => {
