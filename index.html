@@ -344,6 +344,35 @@
       .primary {
         background: var(--accent);
         color: white;
+        transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+      }
+
+      .primary.share-ready {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ff704d, #df3f64 72%, #c92f67);
+        box-shadow: 0 10px 24px rgba(201, 47, 103, 0.28);
+        color: #fff;
+      }
+
+      .primary.share-ready::after {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.28) 48%, transparent 76%);
+        content: "";
+        transform: translateX(-120%);
+        animation: share-shine 2.8s ease-in-out infinite;
+      }
+
+      .primary.share-ready:hover:not(:disabled) {
+        box-shadow: 0 13px 30px rgba(201, 47, 103, 0.38);
+        filter: saturate(1.08);
+        transform: translateY(-2px);
+      }
+
+      @keyframes share-shine {
+        0%, 58% { transform: translateX(-120%); }
+        88%, 100% { transform: translateX(120%); }
       }
 
       .primary:disabled,
@@ -516,6 +545,12 @@
           min-height: 270px;
         }
       }
+
+      @media (prefers-reduced-motion: reduce) {
+        .primary.share-ready::after {
+          animation: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -647,7 +682,10 @@
           verdict: "당신은 '{type}' 입니다.",
           shareTitle: "테토/에겐 얼굴 분석 결과",
           shareIntro: "내 테토/에겐 얼굴 분석 결과는",
-          copied: "결과와 링크를 복사했어요. 메신저에 붙여넣어 공유해 보세요.",
+          preparingShare: "공유 카드 만드는 중",
+          protectedPhoto: "개인정보 보호를 위해 사진을 블러 처리했어요",
+          imageCopied: "결과 카드를 복사했어요. 메신저에 붙여넣어 공유해 보세요.",
+          imageSaved: "결과 카드 이미지를 저장했어요. 메신저에서 공유해 보세요.",
           shareFailed: "공유하지 못했습니다. 잠시 후 다시 시도해 주세요.",
           modelError: "모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.",
           labels: {
@@ -682,7 +720,10 @@
           verdict: "You are '{type}'.",
           shareTitle: "Teto/Egen face analysis result",
           shareIntro: "My Teto/Egen face analysis result is",
-          copied: "Result and link copied. Paste them into a messenger to share.",
+          preparingShare: "Creating share card",
+          protectedPhoto: "Photo blurred to protect your privacy",
+          imageCopied: "Result card copied. Paste it into a messenger to share.",
+          imageSaved: "Result card saved. Share the image from your messenger.",
           shareFailed: "Could not share the result. Please try again.",
           modelError: "The model could not be loaded. Please check the Teachable Machine model URL.",
           labels: {
@@ -742,6 +783,7 @@
       function setPrimaryAction(action) {
         analyzeButton.dataset.action = action;
         analyzeButton.textContent = t(action === "share" ? "shareButton" : "analyzeButton");
+        analyzeButton.classList.toggle("share-ready", action === "share");
       }
 
       async function loadModel() {
@@ -863,48 +905,193 @@
         };
       }
 
-      async function copyShareData(shareData) {
-        const content = `${shareData.text}\n${shareData.url}`;
+      function drawRoundedRect(context, x, y, width, height, radius) {
+        context.beginPath();
+        context.roundRect(x, y, width, height, radius);
+      }
 
-        if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(content);
+      function drawCoverImage(context, image, x, y, width, height) {
+        const imageWidth = image.naturalWidth || image.width;
+        const imageHeight = image.naturalHeight || image.height;
+        const imageRatio = imageWidth / imageHeight;
+        const areaRatio = width / height;
+        let sourceX = 0;
+        let sourceY = 0;
+        let sourceWidth = imageWidth;
+        let sourceHeight = imageHeight;
+
+        if (imageRatio > areaRatio) {
+          sourceWidth = imageHeight * areaRatio;
+          sourceX = (imageWidth - sourceWidth) / 2;
+        } else {
+          sourceHeight = imageWidth / areaRatio;
+          sourceY = (imageHeight - sourceHeight) / 2;
+        }
+
+        context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+      }
+
+      function getCanvasResultColor(className) {
+        const key = getClassKey(className);
+        if (key === "teto") return "#e24d3f";
+        if (key === "egen") return "#2d7dd2";
+        return "#1f7a64";
+      }
+
+      async function createResultCardBlob() {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1200;
+        canvas.height = 1500;
+        const context = canvas.getContext("2d");
+        const sorted = [...latestPredictions].sort((a, b) => b.probability - a.probability);
+        const top = sorted[0];
+        const topPercent = Math.round(top.probability * 100);
+        const accent = getCanvasResultColor(top.className);
+
+        const background = context.createLinearGradient(0, 0, 1200, 1500);
+        background.addColorStop(0, "#f9e7de");
+        background.addColorStop(0.5, "#f4f0ea");
+        background.addColorStop(1, "#e2ebf4");
+        context.fillStyle = background;
+        context.fillRect(0, 0, 1200, 1500);
+
+        context.fillStyle = "#202124";
+        context.font = "900 42px Pretendard, system-ui, sans-serif";
+        context.fillText(currentLanguage === "ko" ? "테토/에겐 얼굴 분석기" : "Teto/Egen Face Analyzer", 72, 100);
+        context.fillStyle = "#68635c";
+        context.font = "700 23px Pretendard, system-ui, sans-serif";
+        context.fillText(t("complete"), 72, 144);
+
+        const privacyCanvas = document.createElement("canvas");
+        privacyCanvas.width = 32;
+        privacyCanvas.height = 20;
+        drawCoverImage(privacyCanvas.getContext("2d"), selectedImage, 0, 0, 32, 20);
+
+        context.save();
+        drawRoundedRect(context, 72, 190, 1056, 610, 38);
+        context.clip();
+        context.filter = "blur(38px)";
+        context.imageSmoothingEnabled = true;
+        drawCoverImage(context, privacyCanvas, 32, 150, 1136, 690);
+        context.filter = "none";
+        const photoShade = context.createLinearGradient(0, 190, 0, 800);
+        photoShade.addColorStop(0, "rgba(20, 22, 24, 0.12)");
+        photoShade.addColorStop(1, "rgba(20, 22, 24, 0.62)");
+        context.fillStyle = photoShade;
+        context.fillRect(72, 190, 1056, 610);
+        context.restore();
+
+        context.fillStyle = "rgba(255, 255, 255, 0.92)";
+        context.font = "700 21px Pretendard, system-ui, sans-serif";
+        context.fillText("🔒 " + t("protectedPhoto"), 108, 675);
+
+        context.save();
+        context.shadowColor = "rgba(45, 38, 30, 0.16)";
+        context.shadowBlur = 34;
+        context.shadowOffsetY = 12;
+        drawRoundedRect(context, 90, 710, 1020, 650, 36);
+        context.fillStyle = "#fffdf8";
+        context.fill();
+        context.restore();
+
+        context.fillStyle = "#68635c";
+        context.font = "800 22px Pretendard, system-ui, sans-serif";
+        context.fillText("MY RESULT", 142, 790);
+        context.fillStyle = accent;
+        context.font = "950 72px Pretendard, system-ui, sans-serif";
+        context.fillText(getDisplayClassName(top.className), 142, 890);
+        context.textAlign = "right";
+        context.font = "950 70px Pretendard, system-ui, sans-serif";
+        context.fillText(topPercent + "%", 1058, 890);
+        context.textAlign = "left";
+        context.fillStyle = "#202124";
+        context.font = "900 34px Pretendard, system-ui, sans-serif";
+        context.fillText(buildVerdict(top.className), 142, 950);
+
+        sorted.slice(0, 3).forEach((prediction, index) => {
+          const y = 1040 + index * 105;
+          const percent = Math.round(prediction.probability * 100);
+          context.fillStyle = "#383532";
+          context.font = "800 24px Pretendard, system-ui, sans-serif";
+          context.fillText(getDisplayClassName(prediction.className), 142, y);
+          context.textAlign = "right";
+          context.fillText(percent + "%", 1058, y);
+          context.textAlign = "left";
+          drawRoundedRect(context, 142, y + 24, 916, 18, 9);
+          context.fillStyle = "#eee7dd";
+          context.fill();
+          if (percent > 0) {
+            drawRoundedRect(context, 142, y + 24, Math.max(18, 916 * prediction.probability), 18, 9);
+            context.fillStyle = getCanvasResultColor(prediction.className);
+            context.fill();
+          }
+        });
+
+        context.fillStyle = "#68635c";
+        context.font = "700 20px Pretendard, system-ui, sans-serif";
+        context.fillText(window.location.host + window.location.pathname, 90, 1430);
+        context.textAlign = "right";
+        context.fillText(currentLanguage === "ko" ? "나도 분석해보기 →" : "Try it yourself →", 1110, 1430);
+
+        return new Promise((resolve, reject) => {
+          canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Image generation failed")), "image/png");
+        });
+      }
+
+      async function shareResultFallback(blob) {
+        if (navigator.clipboard && window.ClipboardItem && window.isSecureContext) {
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+          showToast(t("imageCopied"));
           return;
         }
 
-        const textArea = document.createElement("textarea");
-        textArea.value = content;
-        textArea.setAttribute("readonly", "");
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        const copied = document.execCommand("copy");
-        textArea.remove();
-        if (!copied) throw new Error("Clipboard copy failed");
+        const imageURL = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = imageURL;
+        link.download = "teto-egen-result.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(imageURL), 1000);
+        showToast(t("imageSaved"));
       }
 
       async function shareResult() {
-        if (!latestPredictions) return;
+        if (!latestPredictions || !selectedImage) return;
 
         const shareData = buildShareData();
+        let blob;
+        analyzeButton.disabled = true;
+        analyzeButton.textContent = t("preparingShare");
         try {
-          if (navigator.share) {
-            await navigator.share(shareData);
+          blob = await createResultCardBlob();
+          const file = new File([blob], "teto-egen-result.png", { type: "image/png" });
+          const fileShareData = { ...shareData, files: [file] };
+          const canShareFile = navigator.share &&
+            (!navigator.canShare || navigator.canShare({ files: [file] }));
+
+          if (canShareFile) {
+            await navigator.share(fileShareData);
           } else {
-            await copyShareData(shareData);
-            showToast(t("copied"));
+            await shareResultFallback(blob);
           }
         } catch (error) {
           if (error.name !== "AbortError") {
             console.error(error);
-            try {
-              await copyShareData(shareData);
-              showToast(t("copied"));
-            } catch (copyError) {
-              console.error(copyError);
+            if (blob) {
+              try {
+                await shareResultFallback(blob);
+              } catch (fallbackError) {
+                console.error(fallbackError);
+                showToast(t("shareFailed"));
+              }
+            } else {
               showToast(t("shareFailed"));
             }
           }
+        } finally {
+          analyzeButton.disabled = false;
+          setPrimaryAction("share");
         }
       }
 
