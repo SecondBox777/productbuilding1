@@ -1551,13 +1551,48 @@
         }
       }
 
-      function shareResultWithWhatsApp() {
+      async function shareResultWithWhatsApp() {
         if (!latestPredictions || !selectedImage) return;
+
         const shareData = buildShareData();
         const message = `${shareData.text}\n${shareData.url}`;
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         closeShareMenu();
-        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+
+        if (!isMobileDevice() || !navigator.share) {
+          window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+          return;
+        }
+
+        analyzeButton.disabled = true;
+        try {
+          let file = latestShareFile;
+          if (!file) {
+            analyzeButton.textContent = t("preparingShare");
+            file = await prepareShareCard();
+          }
+
+          const fileShareData = {
+            files: [file],
+            title: shareData.title,
+            text: message,
+          };
+          const canShareFile = !navigator.canShare || navigator.canShare({ files: [file] });
+
+          if (canShareFile) {
+            await navigator.share(fileShareData);
+          } else {
+            window.location.assign(whatsappUrl);
+          }
+        } catch (error) {
+          if (error.name !== "AbortError") {
+            console.error(error);
+            window.location.assign(whatsappUrl);
+          }
+        } finally {
+          analyzeButton.disabled = false;
+          setPrimaryAction("share");
+        }
       }
 
       async function downloadResultImage() {
