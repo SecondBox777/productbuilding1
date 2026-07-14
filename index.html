@@ -645,6 +645,7 @@
     <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.8/kakao.min.js"></script>
     <script>
       const MODEL_URL = "https://teachablemachine.withgoogle.com/models/60Qfr43G1/";
+      const SITE_URL = "https://productbuilding1.pepermint916.workers.dev/";
       const KAKAO_JAVASCRIPT_KEY = "e1c11e474de0a15027cfb31de1260803";
 
       let model;
@@ -938,7 +939,7 @@
         return {
           title: t("shareTitle"),
           text,
-          url: window.location.href,
+          url: SITE_URL,
         };
       }
 
@@ -1066,7 +1067,7 @@
 
         context.fillStyle = "#68635c";
         context.font = "700 20px Pretendard, system-ui, sans-serif";
-        context.fillText(window.location.host + window.location.pathname, 90, 1430);
+        context.fillText(new URL(SITE_URL).host, 90, 1430);
         context.textAlign = "right";
         context.fillText(currentLanguage === "ko" ? "나도 분석해보기 →" : "Try it yourself →", 1110, 1430);
 
@@ -1147,7 +1148,6 @@
         const top = sorted[0];
         const percent = Math.round(top.probability * 100);
         const type = getDisplayClassName(top.className);
-        const siteUrl = window.location.origin + window.location.pathname;
 
         Kakao.Share.sendDefault({
           objectType: "feed",
@@ -1162,16 +1162,16 @@
             imageWidth: 1200,
             imageHeight: 1500,
             link: {
-              mobileWebUrl: siteUrl,
-              webUrl: siteUrl,
+              mobileWebUrl: SITE_URL,
+              webUrl: SITE_URL,
             },
           },
           buttons: [
             {
               title: currentLanguage === "ko" ? "나도 검사하기" : "Try the analyzer",
               link: {
-                mobileWebUrl: siteUrl,
-                webUrl: siteUrl,
+                mobileWebUrl: SITE_URL,
+                webUrl: SITE_URL,
               },
             },
           ],
