@@ -587,6 +587,8 @@
 
       .share-option-icon.kakao { background: #fee500; color: #191919; }
       .share-option-icon.whatsapp { background: #25d366; }
+      .share-option-icon.download { background: #e24d3f; }
+      .share-option-icon.link { background: #2d7dd2; }
 
       .hidden {
         display: none;
@@ -737,6 +739,14 @@
             <span class="share-option-icon whatsapp" aria-hidden="true">W</span>
             <span data-i18n="shareWhatsApp">왓츠앱으로 공유하기</span>
           </button>
+          <button class="share-option" id="share-download" type="button">
+            <span class="share-option-icon download" aria-hidden="true">↓</span>
+            <span data-i18n="downloadResult">결과창 다운로드</span>
+          </button>
+          <button class="share-option" id="share-copy-link" type="button">
+            <span class="share-option-icon link" aria-hidden="true">↗</span>
+            <span data-i18n="copySiteLink">사이트 링크 복사</span>
+          </button>
         </div>
       </div>
     </dialog>
@@ -776,6 +786,8 @@
       const shareDialogClose = document.getElementById("share-dialog-close");
       const shareKakaoButton = document.getElementById("share-kakao");
       const shareWhatsAppButton = document.getElementById("share-whatsapp");
+      const shareDownloadButton = document.getElementById("share-download");
+      const shareCopyLinkButton = document.getElementById("share-copy-link");
       let toastTimer;
 
       const copy = {
@@ -794,6 +806,8 @@
           shareMenuTitle: "공유 방법 선택",
           shareKakao: "카카오톡으로 공유하기",
           shareWhatsApp: "왓츠앱으로 공유하기",
+          downloadResult: "결과창 다운로드",
+          copySiteLink: "사이트 링크 복사",
           resetButton: "다시 선택",
           note:
             "이 결과는 업로드한 Teachable Machine 모델의 학습 데이터 기준 예측이며, 실제 성격이나 정체성을 판단하는 용도가 아닙니다.",
@@ -813,6 +827,8 @@
           kakaoSharing: "카카오톡 공유 준비 중",
           protectedPhoto: "개인정보 보호를 위해 사진을 블러 처리했어요",
           imageSaved: "결과 카드 이미지를 저장했어요. 메신저에서 공유해 보세요.",
+          downloadComplete: "인스타그램 피드에 맞는 4:5 PNG 결과 이미지를 저장했어요.",
+          linkCopied: "사이트 링크를 복사했어요.",
           desktopShared: "결과 PNG를 다운로드하고 판정 문구를 복사했어요. 카카오톡에서 Ctrl+V로 문구를 붙인 뒤 + 버튼으로 PNG를 첨부하세요.",
           kakaoSetupError: "카카오 공유를 열지 못했어요. 카카오 Developers의 Web 플랫폼에 현재 사이트 도메인이 등록됐는지 확인해 주세요.",
           shareFailed: "공유하지 못했습니다. 잠시 후 다시 시도해 주세요.",
@@ -837,6 +853,8 @@
           shareMenuTitle: "Choose how to share",
           shareKakao: "Share via KakaoTalk",
           shareWhatsApp: "Share via WhatsApp",
+          downloadResult: "Download result image",
+          copySiteLink: "Copy site link",
           resetButton: "Choose again",
           note:
             "This result is only a prediction from the uploaded Teachable Machine model. It is not a real judgment of personality or identity.",
@@ -856,6 +874,8 @@
           kakaoSharing: "Preparing KakaoTalk share",
           protectedPhoto: "Photo blurred to protect your privacy",
           imageSaved: "Result card saved. Share the image from your messenger.",
+          downloadComplete: "Saved a 4:5 PNG result image optimized for Instagram feeds.",
+          linkCopied: "Site link copied.",
           desktopShared: "Result PNG downloaded and result text copied. Paste the text with Ctrl+V, then attach the PNG in your messenger.",
           kakaoSetupError: "Could not open KakaoTalk sharing. Check that this site domain is registered in Kakao Developers Web platform settings.",
           shareFailed: "Could not share the result. Please try again.",
@@ -1222,8 +1242,7 @@
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
       }
 
-      async function copyShareText(shareData) {
-        const content = `${shareData.text}\n${shareData.url}`;
+      async function copyText(content) {
         if (navigator.clipboard && window.isSecureContext) {
           await navigator.clipboard.writeText(content);
           return;
@@ -1239,6 +1258,10 @@
         const copied = document.execCommand("copy");
         textArea.remove();
         if (!copied) throw new Error("Text copy failed");
+      }
+
+      function copyShareText(shareData) {
+        return copyText(`${shareData.text}\n${shareData.url}`);
       }
 
       async function shareResultOnDesktop(file, shareData) {
@@ -1305,6 +1328,35 @@
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         closeShareMenu();
         window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      }
+
+      async function downloadResultImage() {
+        if (!latestPredictions || !selectedImage) return;
+        closeShareMenu();
+        analyzeButton.disabled = true;
+        try {
+          analyzeButton.textContent = t("preparingShare");
+          const file = await prepareShareCard();
+          saveShareCard(file);
+          showToast(t("downloadComplete"), 4500);
+        } catch (error) {
+          console.error(error);
+          showToast(t("shareFailed"));
+        } finally {
+          analyzeButton.disabled = false;
+          setPrimaryAction("share");
+        }
+      }
+
+      async function copySiteLink() {
+        closeShareMenu();
+        try {
+          await copyText(SITE_URL);
+          showToast(t("linkCopied"));
+        } catch (error) {
+          console.error(error);
+          showToast(t("shareFailed"));
+        }
       }
 
       async function shareResultWithKakaoFlow() {
@@ -1402,6 +1454,8 @@
       shareDialogClose.addEventListener("click", closeShareMenu);
       shareKakaoButton.addEventListener("click", shareResultWithKakaoFlow);
       shareWhatsAppButton.addEventListener("click", shareResultWithWhatsApp);
+      shareDownloadButton.addEventListener("click", downloadResultImage);
+      shareCopyLinkButton.addEventListener("click", copySiteLink);
       shareDialog.addEventListener("click", (event) => {
         if (event.target === shareDialog) closeShareMenu();
       });
