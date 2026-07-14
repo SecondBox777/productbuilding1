@@ -1151,6 +1151,7 @@
 
         Kakao.Share.sendDefault({
           objectType: "feed",
+          buttonTitle: currentLanguage === "ko" ? "나도 검사하기" : "Try the analyzer",
           content: {
             title: currentLanguage === "ko"
               ? `내 분석 결과는 ${type} ${percent}%!`
@@ -1166,15 +1167,6 @@
               webUrl: SITE_URL,
             },
           },
-          buttons: [
-            {
-              title: currentLanguage === "ko" ? "나도 검사하기" : "Try the analyzer",
-              link: {
-                mobileWebUrl: SITE_URL,
-                webUrl: SITE_URL,
-              },
-            },
-          ],
         });
       }
 
