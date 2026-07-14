@@ -1107,7 +1107,7 @@
         return "#1f7a64";
       }
 
-      async function createResultCardBlob() {
+      async function createResultCardBlob({ protectPhoto = true } = {}) {
         const canvas = document.createElement("canvas");
         canvas.width = 1200;
         canvas.height = 1500;
@@ -1131,28 +1131,35 @@
         context.font = "700 23px Pretendard, system-ui, sans-serif";
         context.fillText(t("complete"), 72, 144);
 
-        const privacyCanvas = document.createElement("canvas");
-        privacyCanvas.width = 32;
-        privacyCanvas.height = 20;
-        drawCoverImage(privacyCanvas.getContext("2d"), selectedImage, 0, 0, 32, 20);
-
         context.save();
         drawRoundedRect(context, 72, 190, 1056, 610, 38);
         context.clip();
-        context.filter = "blur(38px)";
-        context.imageSmoothingEnabled = true;
-        drawCoverImage(context, privacyCanvas, 32, 150, 1136, 690);
-        context.filter = "none";
-        const photoShade = context.createLinearGradient(0, 190, 0, 800);
-        photoShade.addColorStop(0, "rgba(20, 22, 24, 0.12)");
-        photoShade.addColorStop(1, "rgba(20, 22, 24, 0.62)");
-        context.fillStyle = photoShade;
-        context.fillRect(72, 190, 1056, 610);
+        if (protectPhoto) {
+          const privacyCanvas = document.createElement("canvas");
+          privacyCanvas.width = 32;
+          privacyCanvas.height = 20;
+          drawCoverImage(privacyCanvas.getContext("2d"), selectedImage, 0, 0, 32, 20);
+          context.filter = "blur(38px)";
+          context.imageSmoothingEnabled = true;
+          drawCoverImage(context, privacyCanvas, 32, 150, 1136, 690);
+          context.filter = "none";
+        } else {
+          drawCoverImage(context, selectedImage, 72, 190, 1056, 610);
+        }
+        if (protectPhoto) {
+          const photoShade = context.createLinearGradient(0, 190, 0, 800);
+          photoShade.addColorStop(0, "rgba(20, 22, 24, 0.12)");
+          photoShade.addColorStop(1, "rgba(20, 22, 24, 0.62)");
+          context.fillStyle = photoShade;
+          context.fillRect(72, 190, 1056, 610);
+        }
         context.restore();
 
-        context.fillStyle = "rgba(255, 255, 255, 0.92)";
-        context.font = "700 21px Pretendard, system-ui, sans-serif";
-        context.fillText("🔒 " + t("protectedPhoto"), 108, 675);
+        if (protectPhoto) {
+          context.fillStyle = "rgba(255, 255, 255, 0.92)";
+          context.font = "700 21px Pretendard, system-ui, sans-serif";
+          context.fillText("🔒 " + t("protectedPhoto"), 108, 675);
+        }
 
         context.save();
         context.shadowColor = "rgba(45, 38, 30, 0.16)";
@@ -1336,7 +1343,8 @@
         analyzeButton.disabled = true;
         try {
           analyzeButton.textContent = t("preparingShare");
-          const file = await prepareShareCard();
+          const blob = await createResultCardBlob({ protectPhoto: false });
+          const file = new File([blob], "teto-egen-result.png", { type: "image/png" });
           saveShareCard(file);
           showToast(t("downloadComplete"), 4500);
         } catch (error) {
