@@ -3,21 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>술게임 벌칙 뽑기</title>
+    <title>테토/에겐 얼굴 분석기</title>
     <style>
       :root {
         color-scheme: light;
-        --bg: #f7f4ee;
-        --panel: #fffaf2;
-        --panel-strong: #ffffff;
-        --text: #1f2328;
-        --muted: #6b6258;
-        --line: #ded5c7;
-        --accent: #d6413a;
-        --accent-dark: #aa2d29;
-        --blue: #315f8f;
-        --green: #2f7555;
-        --shadow: 0 18px 50px rgba(62, 43, 27, 0.14);
+        --bg: #f4f0ea;
+        --surface: #fffdf8;
+        --surface-strong: #ffffff;
+        --text: #202124;
+        --muted: #68635c;
+        --line: #ded5c8;
+        --teto: #e24d3f;
+        --egen: #2d7dd2;
+        --accent: #1f7a64;
+        --shadow: 0 22px 70px rgba(45, 38, 30, 0.14);
+      }
+
+      body.dark {
+        color-scheme: dark;
+        --bg: #151719;
+        --surface: #202326;
+        --surface-strong: #262a2e;
+        --text: #f4f0e8;
+        --muted: #b7afa5;
+        --line: #3a3f44;
+        --accent: #48a585;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
       }
 
       * {
@@ -28,17 +39,17 @@
         margin: 0;
         min-height: 100vh;
         background:
-          radial-gradient(circle at top left, rgba(214, 65, 58, 0.12), transparent 28rem),
-          linear-gradient(135deg, #f7f4ee 0%, #ebe5dc 100%);
+          linear-gradient(135deg, rgba(226, 77, 63, 0.16), transparent 32%),
+          linear-gradient(225deg, rgba(45, 125, 210, 0.16), transparent 34%),
+          var(--bg);
         color: var(--text);
         font-family:
-          Inter, Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Pretendard, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
       }
 
       button,
-      input,
-      select {
+      input {
         font: inherit;
       }
 
@@ -53,711 +64,916 @@
         padding: 32px 0;
       }
 
-      .topbar {
+      .utility-bar {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 22px;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-bottom: 12px;
       }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-width: 0;
-      }
-
-      .logo {
-        display: grid;
-        width: 46px;
-        height: 46px;
-        place-items: center;
+      .utility-button {
+        min-height: 36px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
         border-radius: 8px;
-        background: var(--accent);
-        color: white;
-        font-size: 25px;
+        background: var(--surface-strong);
+        color: var(--text);
+        font-size: 13px;
         font-weight: 800;
-        box-shadow: 0 10px 24px rgba(214, 65, 58, 0.28);
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+        gap: 20px;
+        align-items: stretch;
+      }
+
+      .intro,
+      .analyzer {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 253, 248, 0.88);
+        box-shadow: var(--shadow);
+      }
+
+      .intro {
+        display: grid;
+        min-height: 640px;
+        overflow: hidden;
+      }
+
+      .visual {
+        position: relative;
+        min-height: 310px;
+        background:
+          radial-gradient(circle at 48% 28%, #fff 0 7%, transparent 7.4%),
+          radial-gradient(circle at 35% 42%, rgba(226, 77, 63, 0.9) 0 5%, transparent 5.4%),
+          radial-gradient(circle at 63% 42%, rgba(45, 125, 210, 0.9) 0 5%, transparent 5.4%),
+          radial-gradient(circle at 50% 49%, #f4c7a1 0 23%, transparent 23.4%),
+          linear-gradient(120deg, rgba(226, 77, 63, 0.28), rgba(45, 125, 210, 0.28));
+        border-bottom: 1px solid var(--line);
+      }
+
+      .visual::before,
+      .visual::after {
+        position: absolute;
+        top: 42%;
+        width: 28%;
+        height: 46%;
+        border: 2px solid rgba(32, 33, 36, 0.18);
+        border-radius: 50% 50% 44% 44%;
+        background: rgba(255, 255, 255, 0.24);
+        content: "";
+      }
+
+      .visual::before {
+        left: 17%;
+        transform: rotate(-10deg);
+      }
+
+      .visual::after {
+        right: 17%;
+        transform: rotate(10deg);
+      }
+
+      .scan-line {
+        position: absolute;
+        left: 11%;
+        right: 11%;
+        top: 48%;
+        height: 3px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, transparent, rgba(31, 122, 100, 0.86), transparent);
+        box-shadow: 0 0 24px rgba(31, 122, 100, 0.45);
+      }
+
+      .intro-copy {
+        padding: 30px;
       }
 
       h1 {
         margin: 0;
-        font-size: clamp(26px, 4vw, 42px);
-        line-height: 1.05;
+        font-size: clamp(36px, 6vw, 64px);
+        line-height: 1.02;
         letter-spacing: 0;
       }
 
       .subtitle {
-        margin: 5px 0 0;
+        margin: 16px 0 0;
         color: var(--muted);
-        font-size: 15px;
+        font-size: 17px;
+        line-height: 1.65;
       }
 
-      .responsible {
-        max-width: 360px;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.45;
-        text-align: right;
-      }
-
-      .layout {
-        display: grid;
-        grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
-        gap: 20px;
-      }
-
-      .picker,
-      .editor,
-      .history {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: rgba(255, 250, 242, 0.9);
-        box-shadow: var(--shadow);
-      }
-
-      .picker {
-        min-height: 560px;
-        display: grid;
-        grid-template-rows: auto 1fr auto;
-        overflow: hidden;
-      }
-
-      .controls {
+      .badges {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        padding: 18px;
-        border-bottom: 1px solid var(--line);
+        gap: 8px;
+        margin-top: 24px;
       }
 
-      .segmented {
-        display: inline-grid;
-        grid-template-columns: repeat(4, minmax(64px, 1fr));
-        gap: 4px;
-        padding: 4px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: #f3ecdf;
-      }
-
-      .segmented button {
-        min-height: 38px;
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34px;
         padding: 0 12px;
-        border-radius: 6px;
-        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-strong);
         color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .analyzer {
+        padding: 22px;
+      }
+
+      .panel-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: 0;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 13px;
         white-space: nowrap;
       }
 
-      .segmented button.active {
-        background: var(--panel-strong);
-        color: var(--text);
-        box-shadow: 0 3px 12px rgba(83, 65, 44, 0.12);
-      }
-
-      .select-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-height: 48px;
-        padding: 0 12px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel-strong);
-      }
-
-      .select-wrap span {
-        color: var(--muted);
-        font-size: 14px;
-      }
-
-      select {
-        border: 0;
-        background: transparent;
-        color: var(--text);
-        outline: none;
-      }
-
-      .stage {
+      .upload-zone {
         position: relative;
         display: grid;
+        min-height: 330px;
         place-items: center;
-        padding: 34px;
+        padding: 20px;
+        border: 2px dashed #cfc3b5;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.62);
+        text-align: center;
+        transition:
+          border-color 160ms ease,
+          background 160ms ease,
+          transform 160ms ease;
+      }
+
+      .upload-zone.dragging {
+        border-color: var(--accent);
+        background: rgba(31, 122, 100, 0.08);
+        transform: translateY(-1px);
+      }
+
+      .upload-zone.has-image {
+        padding: 0;
+        border-style: solid;
+        background: #151515;
+      }
+
+      .upload-empty {
+        display: grid;
+        gap: 14px;
+        justify-items: center;
+        color: var(--muted);
+      }
+
+      .upload-icon {
+        display: grid;
+        width: 78px;
+        height: 78px;
+        place-items: center;
+        border-radius: 50%;
+        background: #ebe4da;
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 900;
+      }
+
+      .upload-empty strong {
+        color: var(--text);
+        font-size: 20px;
+      }
+
+      #image-preview {
+        display: none;
+        width: 100%;
+        max-height: 430px;
+        object-fit: contain;
+        border-radius: 6px;
+      }
+
+      .upload-zone.has-image #image-preview {
+        display: block;
+      }
+
+      .upload-zone.has-image .upload-empty {
+        display: none;
+      }
+
+      .analysis-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: none;
+        place-items: center;
+        border-radius: 6px;
+        background: rgba(18, 20, 22, 0.72);
+        color: white;
         text-align: center;
       }
 
-      .result-box {
-        width: min(100%, 610px);
-        min-height: 270px;
+      .analysis-overlay.active {
         display: grid;
-        place-items: center;
-        padding: 34px;
-        border: 1px solid #ead8c8;
-        border-radius: 8px;
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 247, 234, 0.88)),
-          repeating-linear-gradient(45deg, rgba(214, 65, 58, 0.06) 0 10px, transparent 10px 20px);
       }
 
-      .result-kicker {
-        margin: 0 0 12px;
-        color: var(--accent-dark);
-        font-size: 14px;
+      .analysis-box {
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+      }
+
+      .analysis-spinner {
+        width: 44px;
+        height: 44px;
+        border: 4px solid rgba(255, 255, 255, 0.28);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 900ms linear infinite;
+      }
+
+      .analysis-text {
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #file-input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .primary,
+      .secondary {
+        min-height: 48px;
+        border-radius: 8px;
+        font-weight: 800;
+      }
+
+      .primary {
+        background: var(--accent);
+        color: white;
+      }
+
+      .primary:disabled,
+      .secondary:disabled {
+        cursor: not-allowed;
+        opacity: 0.52;
+      }
+
+      .secondary {
+        border: 1px solid var(--line);
+        background: var(--surface-strong);
+        color: var(--text);
+      }
+
+      .result-card {
+        margin-top: 16px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface-strong);
+      }
+
+      .result-main {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: end;
+        margin-bottom: 16px;
+      }
+
+      .result-label {
+        color: var(--muted);
+        font-size: 13px;
         font-weight: 800;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
-      .result {
-        margin: 0;
-        overflow-wrap: anywhere;
-        font-size: clamp(34px, 7vw, 72px);
-        font-weight: 900;
-        line-height: 1.04;
-        letter-spacing: 0;
-      }
-
-      .result-meta {
-        margin: 18px 0 0;
-        color: var(--muted);
-        font-size: 15px;
-      }
-
-      .draw-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 18px;
-        border-top: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.48);
-      }
-
-      .draw {
-        flex: 1;
-        min-height: 58px;
-        border-radius: 8px;
-        background: var(--accent);
-        color: white;
-        font-size: 20px;
-        font-weight: 850;
-        box-shadow: 0 12px 22px rgba(214, 65, 58, 0.26);
-      }
-
-      .draw:active {
-        transform: translateY(1px);
-      }
-
-      .ghost {
-        width: 58px;
-        min-height: 58px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel-strong);
+      #result-summary {
+        margin: 0 0 14px;
         color: var(--text);
-        font-size: 22px;
+        font-size: 18px;
+        font-weight: 900;
+        line-height: 1.4;
       }
 
-      .side {
+      #winner {
+        margin-top: 4px;
+        font-size: clamp(34px, 5vw, 54px);
+        font-weight: 950;
+        line-height: 1;
+      }
+
+      #confidence {
+        color: var(--muted);
+        font-size: 28px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .meter-list {
         display: grid;
-        gap: 20px;
+        gap: 12px;
       }
 
-      .editor,
-      .history {
-        padding: 18px;
+      .meter-row {
+        display: grid;
+        gap: 7px;
       }
 
-      .section-head {
+      .meter-top {
         display: flex;
-        align-items: center;
         justify-content: space-between;
         gap: 12px;
-        margin-bottom: 14px;
-      }
-
-      h2 {
-        margin: 0;
-        font-size: 18px;
-        letter-spacing: 0;
-      }
-
-      .count {
-        color: var(--muted);
         font-size: 14px;
-      }
-
-      .form {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 96px;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-
-      .form input,
-      .form select {
-        width: 100%;
-        min-height: 44px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: white;
-        padding: 0 12px;
-        color: var(--text);
-        outline: none;
-      }
-
-      .add {
-        grid-column: 1 / -1;
-        min-height: 44px;
-        border-radius: 8px;
-        background: var(--blue);
-        color: white;
-        font-weight: 780;
-      }
-
-      .penalty-list,
-      .history-list {
-        display: grid;
-        gap: 8px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .penalty-item,
-      .history-item {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 10px;
-        align-items: center;
-        min-height: 48px;
-        padding: 10px 10px 10px 12px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel-strong);
-      }
-
-      .penalty-text {
-        min-width: 0;
-      }
-
-      .penalty-name {
-        overflow-wrap: anywhere;
-        font-weight: 720;
-      }
-
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        min-height: 22px;
-        margin-top: 5px;
-        padding: 0 8px;
-        border-radius: 999px;
-        color: white;
-        font-size: 12px;
-        font-weight: 760;
-      }
-
-      .tag.light {
-        background: var(--green);
-      }
-
-      .tag.medium {
-        background: var(--blue);
-      }
-
-      .tag.hot {
-        background: var(--accent);
-      }
-
-      .remove {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        background: #f1e7dc;
-        color: var(--muted);
-        font-size: 20px;
-      }
-
-      .history-item {
-        grid-template-columns: auto minmax(0, 1fr);
-        color: var(--muted);
-      }
-
-      .history-rank {
-        display: grid;
-        width: 30px;
-        height: 30px;
-        place-items: center;
-        border-radius: 8px;
-        background: #f1e7dc;
-        color: var(--text);
-        font-size: 13px;
         font-weight: 800;
       }
 
-      .empty {
-        padding: 20px;
-        border: 1px dashed var(--line);
-        border-radius: 8px;
+      .meter {
+        height: 13px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #eee7dd;
+      }
+
+      .meter-fill {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--accent);
+        transition: width 240ms ease;
+      }
+
+      .note {
+        margin: 14px 0 0;
         color: var(--muted);
-        text-align: center;
+        font-size: 13px;
+        line-height: 1.5;
       }
 
       .toast {
         position: fixed;
         left: 50%;
-        bottom: 22px;
-        transform: translateX(-50%) translateY(20px);
-        opacity: 0;
-        pointer-events: none;
+        bottom: 28px;
+        z-index: 10;
+        max-width: calc(100% - 32px);
         padding: 12px 16px;
         border-radius: 8px;
-        background: #1f2328;
-        color: white;
-        transition: 180ms ease;
+        background: var(--text);
+        box-shadow: var(--shadow);
+        color: var(--surface-strong);
+        font-size: 14px;
+        font-weight: 800;
+        opacity: 0;
+        pointer-events: none;
+        transform: translate(-50%, 12px);
+        transition: opacity 180ms ease, transform 180ms ease;
       }
 
-      .toast.show {
-        transform: translateX(-50%) translateY(0);
+      .toast.visible {
         opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      .hidden {
+        display: none;
       }
 
       @media (max-width: 860px) {
         .app {
-          width: min(100% - 22px, 680px);
-          padding: 20px 0;
+          width: min(100% - 24px, 620px);
+          padding: 18px 0;
         }
 
-        .topbar {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .intro {
+          min-height: auto;
+        }
+
+        .visual {
+          min-height: 220px;
+        }
+
+        .intro-copy,
+        .analyzer {
+          padding: 18px;
+        }
+
+        .panel-title,
+        .result-main {
           align-items: flex-start;
           flex-direction: column;
         }
 
-        .responsible {
-          max-width: none;
-          text-align: left;
-        }
-
-        .layout {
-          grid-template-columns: 1fr;
-        }
-
-        .picker {
-          min-height: 500px;
-        }
-
-        .stage {
-          padding: 22px;
-        }
-
-        .result-box {
-          min-height: 230px;
-          padding: 22px;
+        .status,
+        #confidence {
+          white-space: normal;
         }
       }
 
-      @media (max-width: 520px) {
-        .controls,
-        .draw-row,
-        .editor,
-        .history {
-          padding: 14px;
-        }
-
-        .segmented {
-          width: 100%;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .select-wrap {
-          width: 100%;
-          justify-content: space-between;
-        }
-
-        .form {
+      @media (max-width: 480px) {
+        .actions {
           grid-template-columns: 1fr;
         }
 
-        .draw-row {
-          grid-template-columns: 1fr auto;
+        .upload-zone {
+          min-height: 270px;
         }
       }
     </style>
   </head>
   <body>
     <main class="app">
-      <header class="topbar">
-        <div class="brand">
-          <div class="logo" aria-hidden="true">!</div>
-          <div>
-            <h1>술게임 벌칙 뽑기</h1>
-            <p class="subtitle">친구들이랑 바로 쓰는 랜덤 벌칙 보드</p>
+      <div class="utility-bar" aria-label="site options">
+        <button class="utility-button" id="theme-toggle" type="button">Dark mode</button>
+        <button class="utility-button" id="language-toggle" type="button">English</button>
+      </div>
+      <section class="shell" aria-label="테토 에겐 얼굴 분석기">
+        <aside class="intro">
+          <div class="visual" aria-hidden="true">
+            <div class="scan-line"></div>
           </div>
-        </div>
-        <p class="responsible">과음 강요 없이, 모두가 동의한 벌칙만 넣고 즐겨주세요.</p>
-      </header>
-
-      <section class="layout" aria-label="벌칙 뽑기 앱">
-        <div class="picker">
-          <div class="controls">
-            <div class="segmented" aria-label="강도 필터">
-              <button class="active" type="button" data-filter="all">전체</button>
-              <button type="button" data-filter="light">순한맛</button>
-              <button type="button" data-filter="medium">보통</button>
-              <button type="button" data-filter="hot">매운맛</button>
-            </div>
-            <label class="select-wrap">
-              <span>연출</span>
-              <select id="mode">
-                <option value="fast">빠르게</option>
-                <option value="drama">쫄깃하게</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="stage" aria-live="polite">
-            <div class="result-box">
-              <div>
-                <p class="result-kicker" id="resultKicker">Ready</p>
-                <p class="result" id="result">벌칙 뽑기</p>
-                <p class="result-meta" id="resultMeta">버튼을 누르면 오늘의 벌칙이 나옵니다.</p>
-              </div>
+          <div class="intro-copy">
+            <h1 data-i18n="title">테토/에겐 얼굴 분석기</h1>
+            <p class="subtitle" data-i18n="subtitle">
+              얼굴 사진을 업로드하면 Teachable Machine 이미지 모델이 사진을 읽고 테토형인지
+              에겐형인지 확률로 보여줍니다.
+            </p>
+            <div class="badges" aria-label="분석 특징">
+              <span class="badge">Teachable Machine</span>
+              <span class="badge" data-i18n="badgeUpload">사진 업로드</span>
+              <span class="badge">테토 vs 에겐</span>
             </div>
           </div>
-
-          <div class="draw-row">
-            <button class="draw" id="draw" type="button">뽑기</button>
-            <button class="ghost" id="reset" type="button" title="기본 벌칙으로 초기화" aria-label="기본 벌칙으로 초기화">↻</button>
-          </div>
-        </div>
-
-        <aside class="side">
-          <section class="editor" aria-label="벌칙 편집">
-            <div class="section-head">
-              <h2>벌칙 목록</h2>
-              <span class="count" id="count">0개</span>
-            </div>
-            <form class="form" id="form">
-              <input id="penaltyInput" maxlength="40" placeholder="새 벌칙 입력" autocomplete="off" />
-              <select id="levelInput" aria-label="벌칙 강도">
-                <option value="light">순한맛</option>
-                <option value="medium">보통</option>
-                <option value="hot">매운맛</option>
-              </select>
-              <button class="add" type="submit">추가</button>
-            </form>
-            <ul class="penalty-list" id="penaltyList"></ul>
-          </section>
-
-          <section class="history" aria-label="최근 뽑은 벌칙">
-            <div class="section-head">
-              <h2>최근 결과</h2>
-              <span class="count" id="historyCount">0회</span>
-            </div>
-            <ul class="history-list" id="historyList"></ul>
-          </section>
         </aside>
+
+        <section class="analyzer">
+          <div class="panel-title">
+            <h2 data-i18n="panelTitle">사진 분석</h2>
+            <span class="status" id="model-status" data-status="idle">모델 대기 중</span>
+          </div>
+
+          <label class="upload-zone" id="upload-zone" for="file-input">
+            <img id="image-preview" alt="업로드한 얼굴 사진 미리보기" />
+            <span class="upload-empty">
+              <span class="upload-icon">+</span>
+              <strong data-i18n="uploadTitle">얼굴 사진 업로드</strong>
+              <span data-i18n="uploadHelp">JPG, PNG, WEBP 이미지를 선택하거나 끌어다 놓으세요.</span>
+            </span>
+            <span class="analysis-overlay" id="analysis-overlay" aria-live="polite">
+              <span class="analysis-box">
+                <span class="analysis-spinner" aria-hidden="true"></span>
+                <span class="analysis-text" data-i18n="analyzing">분석중...</span>
+              </span>
+            </span>
+            <input id="file-input" type="file" accept="image/*" />
+          </label>
+
+          <div class="actions">
+            <button class="primary" id="analyze-button" type="button" disabled data-i18n="analyzeButton">분석하기</button>
+            <button class="secondary" id="reset-button" type="button" disabled data-i18n="resetButton">다시 선택</button>
+          </div>
+
+          <article class="result-card hidden" id="result-card" aria-live="polite">
+            <div class="result-main">
+              <div>
+                <div class="result-label">Result</div>
+                <p id="result-summary">분석 완료!</p>
+                <div id="winner">-</div>
+              </div>
+              <div id="confidence">0%</div>
+            </div>
+            <div class="meter-list" id="label-container"></div>
+            <p class="note" data-i18n="note">
+              이 결과는 업로드한 Teachable Machine 모델의 학습 데이터 기준 예측이며,
+              실제 성격이나 정체성을 판단하는 용도가 아닙니다.
+            </p>
+          </article>
+        </section>
       </section>
     </main>
 
-    <div class="toast" id="toast" role="status"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script>
-      const defaults = [
-        { text: "옆 사람 칭찬 세 가지", level: "light" },
-        { text: "물 한 컵 마시기", level: "light" },
-        { text: "최근 사진첩 아무 사진 설명하기", level: "medium" },
-        { text: "지목한 사람과 가위바위보 패자는 한 모금", level: "medium" },
-        { text: "30초 동안 존댓말만 쓰기", level: "hot" },
-        { text: "랜덤 연락처 이름 보고 추억 말하기", level: "hot" },
-      ];
+      const MODEL_URL = "https://teachablemachine.withgoogle.com/models/60Qfr43G1/";
 
-      const labels = {
-        light: "순한맛",
-        medium: "보통",
-        hot: "매운맛",
-      };
+      let model;
+      let selectedImage;
+      let maxPredictions = 0;
+      let currentLanguage = "ko";
+      let latestPredictions = null;
 
-      const state = {
-        filter: "all",
-        penalties: loadPenalties(),
-        history: [],
-        drawing: false,
-      };
-
-      const result = document.querySelector("#result");
-      const resultKicker = document.querySelector("#resultKicker");
-      const resultMeta = document.querySelector("#resultMeta");
-      const drawButton = document.querySelector("#draw");
-      const resetButton = document.querySelector("#reset");
-      const penaltyList = document.querySelector("#penaltyList");
-      const historyList = document.querySelector("#historyList");
-      const count = document.querySelector("#count");
-      const historyCount = document.querySelector("#historyCount");
-      const form = document.querySelector("#form");
-      const input = document.querySelector("#penaltyInput");
-      const levelInput = document.querySelector("#levelInput");
-      const mode = document.querySelector("#mode");
-      const toast = document.querySelector("#toast");
-      const filterButtons = [...document.querySelectorAll("[data-filter]")];
-
-      function loadPenalties() {
-        try {
-          const saved = JSON.parse(localStorage.getItem("penalties") || "null");
-          if (Array.isArray(saved) && saved.length) {
-            return saved;
-          }
-        } catch {
-          localStorage.removeItem("penalties");
-        }
-        return [...defaults];
-      }
-
-      function savePenalties() {
-        localStorage.setItem("penalties", JSON.stringify(state.penalties));
-      }
-
-      function filteredPenalties() {
-        if (state.filter === "all") {
-          return state.penalties;
-        }
-        return state.penalties.filter((item) => item.level === state.filter);
-      }
-
-      function pickRandom(items) {
-        return items[Math.floor(Math.random() * items.length)];
-      }
-
-      function render() {
-        const visible = filteredPenalties();
-        count.textContent = `${visible.length}/${state.penalties.length}개`;
-        filterButtons.forEach((button) => {
-          button.classList.toggle("active", button.dataset.filter === state.filter);
-        });
-
-        penaltyList.innerHTML = "";
-        if (!state.penalties.length) {
-          penaltyList.innerHTML = '<li class="empty">벌칙을 추가해주세요.</li>';
-        } else {
-          state.penalties.forEach((item, index) => {
-            const li = document.createElement("li");
-            li.className = "penalty-item";
-            li.innerHTML = `
-              <div class="penalty-text">
-                <div class="penalty-name"></div>
-                <span class="tag ${item.level}">${labels[item.level]}</span>
-              </div>
-              <button class="remove" type="button" aria-label="벌칙 삭제">×</button>
-            `;
-            li.querySelector(".penalty-name").textContent = item.text;
-            li.querySelector(".remove").addEventListener("click", () => removePenalty(index));
-            penaltyList.append(li);
-          });
-        }
-
-        historyCount.textContent = `${state.history.length}회`;
-        historyList.innerHTML = "";
-        if (!state.history.length) {
-          historyList.innerHTML = '<li class="empty">아직 뽑은 벌칙이 없습니다.</li>';
-        } else {
-          state.history.slice(0, 5).forEach((item, index) => {
-            const li = document.createElement("li");
-            li.className = "history-item";
-            li.innerHTML = `<span class="history-rank">${index + 1}</span><span></span>`;
-            li.querySelector("span:last-child").textContent = item.text;
-            historyList.append(li);
-          });
-        }
-      }
-
-      function addPenalty(event) {
-        event.preventDefault();
-        const text = input.value.trim();
-        if (!text) {
-          showToast("벌칙 내용을 입력해주세요.");
-          input.focus();
-          return;
-        }
-        state.penalties.unshift({ text, level: levelInput.value });
-        input.value = "";
-        savePenalties();
-        render();
-        showToast("벌칙을 추가했습니다.");
-      }
-
-      function removePenalty(index) {
-        const [removed] = state.penalties.splice(index, 1);
-        savePenalties();
-        render();
-        showToast(`${removed.text} 삭제`);
-      }
-
-      function setResult(item) {
-        result.textContent = item.text;
-        resultKicker.textContent = labels[item.level];
-        resultMeta.textContent = `현재 필터: ${state.filter === "all" ? "전체" : labels[state.filter]}`;
-      }
-
-      function drawPenalty() {
-        if (state.drawing) return;
-        const items = filteredPenalties();
-        if (!items.length) {
-          showToast("선택한 강도에 벌칙이 없습니다.");
-          return;
-        }
-
-        state.drawing = true;
-        drawButton.disabled = true;
-        const duration = mode.value === "drama" ? 1600 : 650;
-        const started = Date.now();
-        const spin = window.setInterval(() => {
-          setResult(pickRandom(items));
-          if (Date.now() - started > duration) {
-            window.clearInterval(spin);
-            const selected = pickRandom(items);
-            setResult(selected);
-            state.history.unshift(selected);
-            state.history = state.history.slice(0, 10);
-            state.drawing = false;
-            drawButton.disabled = false;
-            render();
-          }
-        }, 82);
-      }
-
-      function resetDefaults() {
-        state.penalties = [...defaults];
-        state.filter = "all";
-        state.history = [];
-        savePenalties();
-        result.textContent = "벌칙 뽑기";
-        resultKicker.textContent = "Ready";
-        resultMeta.textContent = "버튼을 누르면 오늘의 벌칙이 나옵니다.";
-        render();
-        showToast("기본 벌칙으로 초기화했습니다.");
-      }
-
+      const modelStatus = document.getElementById("model-status");
+      const uploadZone = document.getElementById("upload-zone");
+      const fileInput = document.getElementById("file-input");
+      const imagePreview = document.getElementById("image-preview");
+      const analyzeButton = document.getElementById("analyze-button");
+      const resetButton = document.getElementById("reset-button");
+      const resultCard = document.getElementById("result-card");
+      const resultSummary = document.getElementById("result-summary");
+      const winner = document.getElementById("winner");
+      const confidence = document.getElementById("confidence");
+      const labelContainer = document.getElementById("label-container");
+      const analysisOverlay = document.getElementById("analysis-overlay");
+      const themeToggle = document.getElementById("theme-toggle");
+      const languageToggle = document.getElementById("language-toggle");
+      const toast = document.getElementById("toast");
       let toastTimer;
-      function showToast(message) {
-        toast.textContent = message;
-        toast.classList.add("show");
-        window.clearTimeout(toastTimer);
-        toastTimer = window.setTimeout(() => toast.classList.remove("show"), 1600);
+
+      const copy = {
+        ko: {
+          title: "테토/에겐 얼굴 분석기",
+          subtitle:
+            "얼굴 사진을 업로드하면 Teachable Machine 이미지 모델이 사진을 읽고 테토형인지 에겐형인지 확률로 보여줍니다.",
+          badgeUpload: "사진 업로드",
+          panelTitle: "사진 분석",
+          uploadTitle: "얼굴 사진 업로드",
+          uploadHelp: "JPG, PNG, WEBP 이미지를 선택하거나 끌어다 놓으세요.",
+          analyzing: "분석중...",
+          analyzeButton: "분석하기",
+          analyzingButton: "분석 중",
+          shareButton: "결과 공유하기",
+          resetButton: "다시 선택",
+          note:
+            "이 결과는 업로드한 Teachable Machine 모델의 학습 데이터 기준 예측이며, 실제 성격이나 정체성을 판단하는 용도가 아닙니다.",
+          darkMode: "Dark mode",
+          lightMode: "Light mode",
+          languageToggle: "English",
+          idle: "모델 대기 중",
+          loading: "모델 불러오는 중",
+          ready: "모델 준비 완료",
+          fail: "모델 로드 실패",
+          needModel: "모델 파일 필요",
+          complete: "분석 완료!",
+          verdict: "당신은 '{type}' 입니다.",
+          shareTitle: "테토/에겐 얼굴 분석 결과",
+          shareIntro: "내 테토/에겐 얼굴 분석 결과는",
+          copied: "결과와 링크를 복사했어요. 메신저에 붙여넣어 공유해 보세요.",
+          shareFailed: "공유하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+          modelError: "모델을 불러오지 못했습니다. Teachable Machine 모델 URL을 확인하세요.",
+          labels: {
+            teto: "테토",
+            egen: "에겐",
+          },
+        },
+        en: {
+          title: "Teto/Egen Face Analyzer",
+          subtitle:
+            "Upload a face photo and the Teachable Machine image model will estimate whether it looks closer to Teto or Egen.",
+          badgeUpload: "Photo upload",
+          panelTitle: "Photo analysis",
+          uploadTitle: "Upload a face photo",
+          uploadHelp: "Choose or drag in a JPG, PNG, or WEBP image.",
+          analyzing: "Analyzing...",
+          analyzeButton: "Analyze",
+          analyzingButton: "Analyzing",
+          shareButton: "Share result",
+          resetButton: "Choose again",
+          note:
+            "This result is only a prediction from the uploaded Teachable Machine model. It is not a real judgment of personality or identity.",
+          darkMode: "Dark mode",
+          lightMode: "Light mode",
+          languageToggle: "한국어",
+          idle: "Model standby",
+          loading: "Loading model",
+          ready: "Model ready",
+          fail: "Model failed",
+          needModel: "Model needed",
+          complete: "Analysis complete!",
+          verdict: "You are '{type}'.",
+          shareTitle: "Teto/Egen face analysis result",
+          shareIntro: "My Teto/Egen face analysis result is",
+          copied: "Result and link copied. Paste them into a messenger to share.",
+          shareFailed: "Could not share the result. Please try again.",
+          modelError: "The model could not be loaded. Please check the Teachable Machine model URL.",
+          labels: {
+            teto: "Teto (Masculine)",
+            egen: "Egen (Soft)",
+          },
+        },
+      };
+
+      function t(key) {
+        return copy[currentLanguage][key];
       }
 
-      filterButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          state.filter = button.dataset.filter;
-          render();
+      function setStatus(key) {
+        modelStatus.dataset.status = key;
+        modelStatus.textContent = t(key);
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => window.setTimeout(resolve, ms));
+      }
+
+      function getClassKey(className) {
+        const normalized = className.toLowerCase();
+        if (normalized.includes("테토") || normalized.includes("teto")) return "teto";
+        if (normalized.includes("에겐") || normalized.includes("egen")) return "egen";
+        return null;
+      }
+
+      function getDisplayClassName(className) {
+        const key = getClassKey(className);
+        return key ? copy[currentLanguage].labels[key] : className;
+      }
+
+      function applyLanguage() {
+        document.documentElement.lang = currentLanguage;
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          element.textContent = t(element.dataset.i18n);
         });
+        languageToggle.textContent = t("languageToggle");
+        themeToggle.textContent = document.body.classList.contains("dark") ? t("lightMode") : t("darkMode");
+        setStatus(modelStatus.dataset.status || "idle");
+        if (latestPredictions && !resultCard.classList.contains("hidden")) {
+          renderPredictions(latestPredictions);
+        } else {
+          analyzeButton.textContent = t("analyzeButton");
+        }
+      }
+
+      function showToast(message) {
+        window.clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add("visible");
+        toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 3200);
+      }
+
+      function setPrimaryAction(action) {
+        analyzeButton.dataset.action = action;
+        analyzeButton.textContent = t(action === "share" ? "shareButton" : "analyzeButton");
+      }
+
+      async function loadModel() {
+        if (model) return model;
+
+        setStatus("loading");
+        analyzeButton.disabled = true;
+
+        const modelURL = MODEL_URL + "model.json";
+        const metadataURL = MODEL_URL + "metadata.json";
+
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        setStatus("ready");
+        analyzeButton.disabled = !selectedImage;
+        return model;
+      }
+
+      function setImage(file) {
+        if (!file || !file.type.startsWith("image/")) return;
+
+        const imageURL = URL.createObjectURL(file);
+        imagePreview.onload = () => {
+          URL.revokeObjectURL(imageURL);
+          selectedImage = imagePreview;
+          uploadZone.classList.add("has-image");
+          analyzeButton.disabled = !model;
+          resetButton.disabled = false;
+          resultCard.classList.add("hidden");
+          analysisOverlay.classList.remove("active");
+          latestPredictions = null;
+          setPrimaryAction("analyze");
+        };
+        imagePreview.src = imageURL;
+      }
+
+      function resetImage() {
+        selectedImage = null;
+        fileInput.value = "";
+        imagePreview.removeAttribute("src");
+        uploadZone.classList.remove("has-image");
+        analyzeButton.disabled = true;
+        resetButton.disabled = true;
+        resultCard.classList.add("hidden");
+        analysisOverlay.classList.remove("active");
+        latestPredictions = null;
+        setPrimaryAction("analyze");
+      }
+
+      function getResultColor(className) {
+        const key = getClassKey(className);
+        if (key === "teto") return "var(--teto)";
+        if (key === "egen") return "var(--egen)";
+        return "var(--accent)";
+      }
+
+      function buildSummary() {
+        return t("complete");
+      }
+
+      function buildVerdict(className) {
+        return t("verdict").replace("{type}", getDisplayClassName(className));
+      }
+
+      function renderPredictions(predictions) {
+        latestPredictions = predictions;
+        const sorted = [...predictions].sort((a, b) => b.probability - a.probability);
+        const top = sorted[0];
+        const percent = Math.round(top.probability * 100);
+
+        resultSummary.textContent = buildSummary();
+        winner.textContent = buildVerdict(top.className);
+        winner.style.color = getResultColor(top.className);
+        confidence.textContent = percent + "%";
+        labelContainer.innerHTML = "";
+
+        sorted.forEach((prediction) => {
+          const row = document.createElement("div");
+          row.className = "meter-row";
+
+          const topLine = document.createElement("div");
+          topLine.className = "meter-top";
+
+          const name = document.createElement("span");
+          name.textContent = getDisplayClassName(prediction.className);
+
+          const value = document.createElement("span");
+          value.textContent = Math.round(prediction.probability * 100) + "%";
+
+          const meter = document.createElement("div");
+          meter.className = "meter";
+
+          const fill = document.createElement("div");
+          fill.className = "meter-fill";
+          fill.style.background = getResultColor(prediction.className);
+          fill.style.width = prediction.probability * 100 + "%";
+
+          topLine.append(name, value);
+          meter.appendChild(fill);
+          row.append(topLine, meter);
+          labelContainer.appendChild(row);
+        });
+
+        resultCard.classList.remove("hidden");
+        setPrimaryAction("share");
+      }
+
+      function buildShareData() {
+        const sorted = [...latestPredictions].sort((a, b) => b.probability - a.probability);
+        const top = sorted[0];
+        const percent = Math.round(top.probability * 100);
+        const text = `${t("shareIntro")} ${getDisplayClassName(top.className)} (${percent}%)!`;
+
+        return {
+          title: t("shareTitle"),
+          text,
+          url: window.location.href,
+        };
+      }
+
+      async function copyShareData(shareData) {
+        const content = `${shareData.text}\n${shareData.url}`;
+
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(content);
+          return;
+        }
+
+        const textArea = document.createElement("textarea");
+        textArea.value = content;
+        textArea.setAttribute("readonly", "");
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        const copied = document.execCommand("copy");
+        textArea.remove();
+        if (!copied) throw new Error("Clipboard copy failed");
+      }
+
+      async function shareResult() {
+        if (!latestPredictions) return;
+
+        const shareData = buildShareData();
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+          } else {
+            await copyShareData(shareData);
+            showToast(t("copied"));
+          }
+        } catch (error) {
+          if (error.name !== "AbortError") {
+            console.error(error);
+            try {
+              await copyShareData(shareData);
+              showToast(t("copied"));
+            } catch (copyError) {
+              console.error(copyError);
+              showToast(t("shareFailed"));
+            }
+          }
+        }
+      }
+
+      async function analyzeImage() {
+        if (!selectedImage) return;
+
+        try {
+          analyzeButton.disabled = true;
+          analyzeButton.textContent = t("analyzingButton");
+          analysisOverlay.classList.add("active");
+          resultCard.classList.add("hidden");
+          await loadModel();
+
+          const [predictions] = await Promise.all([model.predict(selectedImage), sleep(1400)]);
+          renderPredictions(predictions);
+        } catch (error) {
+          console.error(error);
+          setStatus("fail");
+          alert(t("modelError"));
+        } finally {
+          analysisOverlay.classList.remove("active");
+          setPrimaryAction(latestPredictions ? "share" : "analyze");
+          analyzeButton.disabled = !selectedImage || !model;
+        }
+      }
+
+      fileInput.addEventListener("change", (event) => {
+        setImage(event.target.files[0]);
       });
 
-      form.addEventListener("submit", addPenalty);
-      drawButton.addEventListener("click", drawPenalty);
-      resetButton.addEventListener("click", resetDefaults);
-      render();
+      uploadZone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        uploadZone.classList.add("dragging");
+      });
+
+      uploadZone.addEventListener("dragleave", () => {
+        uploadZone.classList.remove("dragging");
+      });
+
+      uploadZone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        uploadZone.classList.remove("dragging");
+        setImage(event.dataTransfer.files[0]);
+      });
+
+      analyzeButton.addEventListener("click", () => {
+        if (analyzeButton.dataset.action === "share") {
+          shareResult();
+        } else {
+          analyzeImage();
+        }
+      });
+      resetButton.addEventListener("click", resetImage);
+      themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        themeToggle.textContent = document.body.classList.contains("dark") ? t("lightMode") : t("darkMode");
+      });
+      languageToggle.addEventListener("click", () => {
+        currentLanguage = currentLanguage === "ko" ? "en" : "ko";
+        applyLanguage();
+      });
+
+      setPrimaryAction("analyze");
+      applyLanguage();
+
+      loadModel().catch((error) => {
+        console.error(error);
+        setStatus("needModel");
+      });
     </script>
   </body>
 </html>
