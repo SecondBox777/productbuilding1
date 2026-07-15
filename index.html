@@ -37,8 +37,20 @@
             "@id": "https://egentest.online/#website",
             "url": "https://egentest.online/",
             "name": "테토/에겐 얼굴 분석기",
-            "alternateName": "테토 에겐 테스트",
+            "alternateName": ["테토 에겐 테스트", "테토형 에겐형 테스트"],
+            "description": "사진 한 장의 시각적 패턴을 테토형·에겐형 학습 분류와 비교해 확률로 보여주는 무료 AI 얼굴 테스트",
             "inLanguage": "ko-KR"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://egentest.online/#webpage",
+            "url": "https://egentest.online/",
+            "name": "무료 AI 테토 에겐 얼굴 테스트 | 얼굴 분석기",
+            "description": "사진 한 장으로 테토형·에겐형 확률 결과와 해석, 사진 선택 팁을 확인하는 무료 AI 얼굴 테스트",
+            "inLanguage": "ko-KR",
+            "isPartOf": { "@id": "https://egentest.online/#website" },
+            "mainEntity": { "@id": "https://egentest.online/#app" },
+            "dateModified": "2026-07-15"
           },
           {
             "@type": "WebApplication",
@@ -62,7 +74,8 @@
               "브라우저 기반 AI 이미지 분석",
               "테토형·에겐형 확률 결과",
               "결과 이미지 저장 및 공유"
-            ]
+            ],
+            "subjectOf": { "@id": "https://egentest.online/#webpage" }
           },
           {
             "@type": "FAQPage",
@@ -73,7 +86,7 @@
                 "name": "결과가 실제 성격이나 정체성을 의미하나요?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "아닙니다. 사진의 시각적 패턴을 두 가지 유행 표현으로 분류한 엔터테인먼트 결과이며 실제 성격, 성별 또는 정체성을 판정하지 않습니다."
+                  "text": "아닙니다. 사진의 시각적 패턴을 두 가지 유행 표현으로 분류한 엔터테인먼트 결과입니다. 채용, 건강, 관계, 교육처럼 사람에게 영향을 주는 의사결정에 사용해서는 안 됩니다."
                 }
               },
               {
@@ -81,7 +94,15 @@
                 "name": "같은 사람인데 결과가 바뀌는 이유는 무엇인가요?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "이미지 모델은 얼굴뿐 아니라 밝기, 색감, 촬영 각도와 배경의 영향도 받으므로 같은 사람도 사진 조건에 따라 결과가 달라질 수 있습니다."
+                  "text": "이미지 모델은 얼굴만이 아니라 사진에 포함된 밝기, 색감, 각도와 주변 패턴의 영향도 받을 수 있습니다. 결과 변화는 자연스러운 현상이며 모델의 한계를 보여주는 부분입니다."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "결과 이미지는 어디에 사용할 수 있나요?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "공유 메뉴에서 4:5 PNG를 내려받아 인스타그램 등 개인 소셜 미디어에 올릴 수 있습니다. 타인의 사진을 사용했다면 게시 전에 당사자의 허락을 받고, 사진에 관한 권리와 각 플랫폼 규칙을 지켜 주세요."
                 }
               },
               {
@@ -89,7 +110,23 @@
                 "name": "이용료나 회원가입이 필요한가요?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "현재 분석 기능은 무료이며 회원가입이 필요하지 않습니다."
+                  "text": "현재 분석 기능은 무료이며 회원가입을 요구하지 않습니다. 광고가 게재되더라도 광고 클릭은 서비스 이용 조건이 아니며, 관심 있는 광고만 자발적으로 확인해야 합니다."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "선택한 얼굴 사진은 서버에 저장되나요?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "사진은 브라우저에서 분석과 결과 이미지 생성에 사용됩니다. 사이트 운영자가 업로드 사진을 별도 계정이나 데이터베이스에 저장하는 기능은 없습니다."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "어떤 사진을 사용해야 결과가 더 안정적인가요?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "한 사람의 얼굴 전체가 정면에 가깝게 보이고 밝기와 초점이 고른 사진을 권장합니다. 단체 사진, 작은 얼굴, 강한 필터나 스티커는 피하는 것이 좋습니다."
                 }
               }
             ]
@@ -739,6 +776,23 @@
         background: var(--surface-strong);
       }
 
+      .answer-section { margin-top: 34px; }
+      .answer-intro { max-width: 820px; }
+      .answer-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin: 18px 0 0;
+      }
+      .answer-grid > div {
+        padding: 18px;
+        border-left: 4px solid var(--accent);
+        border-radius: 8px;
+        background: var(--surface-strong);
+      }
+      .answer-grid dt { font-weight: 900; }
+      .answer-grid dd { margin: 7px 0 0; color: var(--muted); line-height: 1.75; }
+
       .faq-list { display: grid; gap: 10px; margin-top: 18px; }
       .faq-list details { padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; }
       .faq-list summary { cursor: pointer; font-weight: 900; }
@@ -771,7 +825,8 @@
         }
 
         .utility-bar { align-items: flex-start; flex-direction: column-reverse; }
-        .guide-grid { grid-template-columns: 1fr; }
+        .guide-grid,
+        .answer-grid { grid-template-columns: 1fr; }
 
         .intro {
           min-height: auto;
@@ -922,6 +977,29 @@
           </section>
         </div>
 
+        <section class="answer-section" aria-labelledby="answers-title">
+          <h2 id="answers-title" data-i18n="answersTitle">테토 에겐 테스트 핵심 답변</h2>
+          <p class="answer-intro" data-i18n="answersIntro">서비스를 이용하기 전에 가장 많이 확인하는 내용을 짧고 명확하게 정리했습니다.</p>
+          <dl class="answer-grid">
+            <div>
+              <dt data-i18n="answerWhatQ">테토 에겐 테스트란 무엇인가요?</dt>
+              <dd data-i18n="answerWhatA">얼굴 사진의 시각적 패턴을 테토형·에겐형 학습 분류와 비교해 각 확률을 보여주는 무료 오락용 이미지 분석 도구입니다.</dd>
+            </div>
+            <div>
+              <dt data-i18n="answerUseQ">누가 언제 이용하면 좋은가요?</dt>
+              <dd data-i18n="answerUseA">내 사진의 분위기나 스타일을 친구들과 가볍게 비교하고 싶을 때 이용할 수 있습니다. 사람을 평가하거나 중요한 결정을 내리는 용도에는 적합하지 않습니다.</dd>
+            </div>
+            <div>
+              <dt data-i18n="answerStepsQ">어떻게 이용하나요?</dt>
+              <dd data-i18n="answerStepsA">JPG·PNG·WEBP 사진 한 장을 선택하고 분석하기를 누른 뒤 테토형·에겐형 확률을 확인합니다. 결과는 4:5 PNG 카드로 저장하거나 공유할 수 있습니다.</dd>
+            </div>
+            <div>
+              <dt data-i18n="answerLimitQ">결과를 어떻게 해석하나요?</dt>
+              <dd data-i18n="answerLimitA">확률은 사진이 모델의 학습 이미지 패턴과 얼마나 비슷한지 나타냅니다. 실제 성격·성별·정체성·능력에 대한 과학적 측정값은 아닙니다.</dd>
+            </div>
+          </dl>
+        </section>
+
         <section aria-labelledby="faq-title" style="margin-top: 34px">
           <h2 id="faq-title" data-i18n="faqTitle">자주 묻는 질문</h2>
           <div class="faq-list">
@@ -940,6 +1018,14 @@
             <details>
               <summary data-i18n="faqCostQ">이용료나 회원가입이 필요한가요?</summary>
               <p data-i18n="faqCostA">현재 분석 기능은 무료이며 회원가입을 요구하지 않습니다. 광고가 게재되더라도 광고 클릭은 서비스 이용 조건이 아니며, 관심 있는 광고만 자발적으로 확인해야 합니다.</p>
+            </details>
+            <details>
+              <summary data-i18n="faqStorageQ">선택한 얼굴 사진은 서버에 저장되나요?</summary>
+              <p data-i18n="faqStorageA">사진은 브라우저에서 분석과 결과 이미지 생성에 사용됩니다. 사이트 운영자가 업로드 사진을 별도 계정이나 데이터베이스에 저장하는 기능은 없습니다.</p>
+            </details>
+            <details>
+              <summary data-i18n="faqPhotoQ">어떤 사진을 사용해야 결과가 더 안정적인가요?</summary>
+              <p data-i18n="faqPhotoA">한 사람의 얼굴 전체가 정면에 가깝게 보이고 밝기와 초점이 고른 사진을 권장합니다. 단체 사진, 작은 얼굴, 강한 필터나 스티커는 피하는 것이 좋습니다.</p>
             </details>
           </div>
         </section>
@@ -1082,6 +1168,16 @@
           guidePhotoText: "얼굴 전체가 프레임 안에 들어오고 그림자가 적은 사진을 권장합니다. 여러 명이 함께 나온 사진, 지나치게 작은 얼굴, 강한 필터나 스티커가 적용된 사진은 모델이 엉뚱한 특징을 읽을 수 있습니다. 서로 다른 사진 두세 장을 비교하면 사진 조건의 영향을 이해하기 쉽습니다.",
           guidePrivacyTitle: "사진과 결과는 어떻게 처리되나요?",
           guidePrivacyText: "선택한 사진은 브라우저 화면에서 분석 및 결과 이미지 생성에 사용됩니다. 사이트 운영자가 사진을 별도 계정이나 데이터베이스에 저장하는 기능은 없습니다. 결과 다운로드는 원본 사진이 포함되므로 공개 게시 전 본인과 사진 속 인물의 동의를 확인해 주세요.",
+          answersTitle: "테토 에겐 테스트 핵심 답변",
+          answersIntro: "서비스를 이용하기 전에 가장 많이 확인하는 내용을 짧고 명확하게 정리했습니다.",
+          answerWhatQ: "테토 에겐 테스트란 무엇인가요?",
+          answerWhatA: "얼굴 사진의 시각적 패턴을 테토형·에겐형 학습 분류와 비교해 각 확률을 보여주는 무료 오락용 이미지 분석 도구입니다.",
+          answerUseQ: "누가 언제 이용하면 좋은가요?",
+          answerUseA: "내 사진의 분위기나 스타일을 친구들과 가볍게 비교하고 싶을 때 이용할 수 있습니다. 사람을 평가하거나 중요한 결정을 내리는 용도에는 적합하지 않습니다.",
+          answerStepsQ: "어떻게 이용하나요?",
+          answerStepsA: "JPG·PNG·WEBP 사진 한 장을 선택하고 분석하기를 누른 뒤 테토형·에겐형 확률을 확인합니다. 결과는 4:5 PNG 카드로 저장하거나 공유할 수 있습니다.",
+          answerLimitQ: "결과를 어떻게 해석하나요?",
+          answerLimitA: "확률은 사진이 모델의 학습 이미지 패턴과 얼마나 비슷한지 나타냅니다. 실제 성격·성별·정체성·능력에 대한 과학적 측정값은 아닙니다.",
           faqTitle: "자주 묻는 질문",
           faqAccuracyQ: "결과가 실제 성격이나 정체성을 의미하나요?",
           faqAccuracyA: "아닙니다. 사진의 시각적 패턴을 두 가지 유행 표현으로 분류한 엔터테인먼트 결과입니다. 채용, 건강, 관계, 교육처럼 사람에게 영향을 주는 의사결정에 사용해서는 안 됩니다.",
@@ -1091,6 +1187,10 @@
           faqShareA: "공유 메뉴에서 4:5 PNG를 내려받아 인스타그램 등 개인 소셜 미디어에 올릴 수 있습니다. 타인의 사진을 사용했다면 게시 전에 당사자의 허락을 받고, 사진에 관한 권리와 각 플랫폼 규칙을 지켜 주세요.",
           faqCostQ: "이용료나 회원가입이 필요한가요?",
           faqCostA: "현재 분석 기능은 무료이며 회원가입을 요구하지 않습니다. 광고가 게재되더라도 광고 클릭은 서비스 이용 조건이 아니며, 관심 있는 광고만 자발적으로 확인해야 합니다.",
+          faqStorageQ: "선택한 얼굴 사진은 서버에 저장되나요?",
+          faqStorageA: "사진은 브라우저에서 분석과 결과 이미지 생성에 사용됩니다. 사이트 운영자가 업로드 사진을 별도 계정이나 데이터베이스에 저장하는 기능은 없습니다.",
+          faqPhotoQ: "어떤 사진을 사용해야 결과가 더 안정적인가요?",
+          faqPhotoA: "한 사람의 얼굴 전체가 정면에 가깝게 보이고 밝기와 초점이 고른 사진을 권장합니다. 단체 사진, 작은 얼굴, 강한 필터나 스티커는 피하는 것이 좋습니다.",
           footerAbout: "사이트 소개",
           footerPrivacy: "개인정보 처리방침",
           footerTerms: "이용약관",
@@ -1157,6 +1257,16 @@
           guidePhotoText: "Use a photo with the entire face in frame and minimal shadows. Group photos, very small faces, strong filters, and stickers can distract the model. Comparing two or three photos helps reveal how much the photo conditions affect the output.",
           guidePrivacyTitle: "How are photos and results handled?",
           guidePrivacyText: "Your chosen image is used in the browser for analysis and result-card generation. The site has no account or database feature that stores uploaded photos for its operator. Downloaded result cards contain the original photo, so obtain permission from everyone shown before posting publicly.",
+          answersTitle: "Quick answers about the Teto/Egen test",
+          answersIntro: "Here are concise answers to the main questions people ask before using the service.",
+          answerWhatQ: "What is the Teto/Egen test?",
+          answerWhatA: "It is a free entertainment image tool that compares visual patterns in a face photo with the model's learned Teto and Egen categories and shows each probability.",
+          answerUseQ: "Who is it for and when should I use it?",
+          answerUseA: "Use it when you want to compare the visual mood or styling of your photos for fun with friends. It is not suitable for evaluating people or making important decisions.",
+          answerStepsQ: "How do I use it?",
+          answerStepsA: "Choose one JPG, PNG, or WEBP photo, select Analyze, and review the Teto and Egen probabilities. You can save or share the result as a 4:5 PNG card.",
+          answerLimitQ: "How should I interpret the result?",
+          answerLimitA: "The probabilities describe similarity to image patterns in the model's training examples. They are not scientific measurements of personality, gender, identity, or ability.",
           faqTitle: "Frequently asked questions",
           faqAccuracyQ: "Does the result describe a real personality or identity?",
           faqAccuracyA: "No. It is an entertainment result that sorts visual photo patterns using two popular labels. Never use it for decisions affecting employment, health, relationships, education, or another person's opportunities.",
@@ -1166,6 +1276,10 @@
           faqShareA: "The share menu provides a 4:5 PNG suitable for personal social media such as Instagram. If you used someone else's photo, get their permission before posting and follow the photo rights and rules of each platform.",
           faqCostQ: "Is payment or registration required?",
           faqCostA: "The analyzer is currently free and requires no account. If ads are displayed, clicking them is never a condition of using the service; only visit an ad when you are genuinely interested.",
+          faqStorageQ: "Is my selected face photo stored on a server?",
+          faqStorageA: "The photo is used in your browser for analysis and result-image generation. The site has no feature that stores uploaded photos in a separate operator account or database.",
+          faqPhotoQ: "What kind of photo gives a more consistent result?",
+          faqPhotoA: "Use a well-lit, in-focus photo showing one full face near the front. Avoid group photos, tiny faces, strong filters, and stickers.",
           footerAbout: "About",
           footerPrivacy: "Privacy Policy",
           footerTerms: "Terms",
