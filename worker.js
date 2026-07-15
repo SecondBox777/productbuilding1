@@ -13,6 +13,14 @@ const CANONICAL_PATHS = {
   "/terms.html": "/terms",
 };
 
+const PAGE_ASSETS = {
+  "/": "/index.html",
+  "/about": "/about.html",
+  "/contact": "/contact.html",
+  "/privacy": "/privacy.html",
+  "/terms": "/terms.html",
+};
+
 const HSTS_VALUE = "max-age=31536000; includeSubDomains";
 
 function redirectToCanonical(requestUrl) {
@@ -86,7 +94,9 @@ export default {
       });
     }
 
-    const response = await env.ASSETS.fetch(request);
+    const assetPath = PAGE_ASSETS[url.pathname];
+    const assetRequest = assetPath ? new URL(assetPath, url) : request;
+    const response = await env.ASSETS.fetch(assetRequest);
     return withSecurityHeaders(response, request.method);
   },
 };
