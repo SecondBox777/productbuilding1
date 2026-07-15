@@ -1,0 +1,6 @@
+.git
+.assetsignore
+functions
+worker.js
+wrangler.jsonc
+_routes.json
