@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="사진 한 장으로 테토형·에겐형 이미지 경향을 확인하는 무료 AI 얼굴 테스트입니다. 회원가입 없이 확률 결과, 해석법과 사진 선택 팁을 확인하세요." />
+    <meta name="description" content="무료 AI 테토 에겐 얼굴 테스트로 사진 한 장의 테토형·에겐형 이미지 경향을 분석하세요. 회원가입 없이 확률 결과, 해석법과 사진 선택 팁을 확인할 수 있습니다." />
     <meta name="robots" content="index,follow,max-image-preview:large" />
     <meta name="author" content="테토/에겐 얼굴 분석기" />
     <meta name="theme-color" content="#f4f0ea" />
@@ -13,7 +13,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ko_KR" />
     <meta property="og:site_name" content="테토/에겐 얼굴 분석기" />
-    <meta property="og:title" content="테토 에겐 테스트 | 무료 AI 얼굴 분석기" />
+    <meta property="og:title" content="무료 AI 테토 에겐 얼굴 테스트 | 얼굴 분석기" />
     <meta property="og:description" content="사진 한 장으로 테토형·에겐형 이미지 경향과 확률을 확인하고 결과 카드를 공유해 보세요." />
     <meta property="og:url" content="https://egentest.online/" />
     <meta property="og:image" content="https://egentest.online/assets/favicon.png" />
@@ -21,11 +21,11 @@
     <meta property="og:image:height" content="1254" />
     <meta property="og:image:alt" content="테토와 에겐을 상징하는 양면 얼굴 아이콘" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="테토 에겐 테스트 | 무료 AI 얼굴 분석기" />
+    <meta name="twitter:title" content="무료 AI 테토 에겐 얼굴 테스트 | 얼굴 분석기" />
     <meta name="twitter:description" content="사진 한 장으로 테토형·에겐형 이미지 경향과 확률을 확인해 보세요." />
     <meta name="twitter:image" content="https://egentest.online/assets/favicon.png" />
     <meta name="twitter:image:alt" content="테토와 에겐을 상징하는 양면 얼굴 아이콘" />
-    <title>테토 에겐 테스트 | 무료 AI 얼굴 분석기</title>
+    <title>무료 AI 테토 에겐 얼굴 테스트 | 얼굴 분석기</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7227470209493750"
       crossorigin="anonymous"></script>
     <script type="application/ld+json">
@@ -840,7 +840,7 @@
             <div class="scan-line"></div>
           </div>
           <div class="intro-copy">
-            <h1 data-i18n="title">테토 에겐 테스트</h1>
+            <h1 data-i18n="title">무료 AI 테토 에겐 얼굴 테스트</h1>
             <p class="subtitle" data-i18n="subtitle">
               얼굴 사진을 업로드하면 AI 이미지 모델이 사진을 읽고 테토형인지 에겐형인지
               확률로 보여주는 무료 얼굴 분석기입니다.
@@ -986,13 +986,13 @@
       </div>
     </dialog>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.8/kakao.min.js"></script>
     <script>
       const MODEL_URL = "https://teachablemachine.withgoogle.com/models/60Qfr43G1/";
       const SITE_URL = "https://egentest.online/";
       const KAKAO_JAVASCRIPT_KEY = "e1c11e474de0a15027cfb31de1260803";
+      const TFJS_URL = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js";
+      const TM_IMAGE_URL = "https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8.5/dist/teachablemachine-image.min.js";
+      const KAKAO_SDK_URL = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.8/kakao.min.js";
 
       let model;
       let selectedImage;
@@ -1027,7 +1027,7 @@
 
       const copy = {
         ko: {
-          title: "테토 에겐 테스트",
+          title: "무료 AI 테토 에겐 얼굴 테스트",
           navAnalyzer: "분석기",
           navGuide: "이용 가이드",
           navAbout: "사이트 소개",
@@ -1182,6 +1182,33 @@
         return copy[currentLanguage][key];
       }
 
+      function loadScript(id, source) {
+        const existing = document.getElementById(id);
+        if (existing?.dataset.loaded === "true") return Promise.resolve();
+
+        return new Promise((resolve, reject) => {
+          const script = existing || document.createElement("script");
+          script.id = id;
+          script.src = source;
+          script.async = true;
+          script.onload = () => {
+            script.dataset.loaded = "true";
+            resolve();
+          };
+          script.onerror = () => reject(new Error(`Failed to load ${source}`));
+          if (!existing) document.head.appendChild(script);
+        });
+      }
+
+      async function loadModelScripts() {
+        await loadScript("tensorflow-script", TFJS_URL);
+        await loadScript("teachable-machine-script", TM_IMAGE_URL);
+      }
+
+      async function loadKakaoScript() {
+        await loadScript("kakao-sdk-script", KAKAO_SDK_URL);
+      }
+
       function initializeKakao() {
         if (!window.Kakao) return false;
         if (!Kakao.isInitialized()) Kakao.init(KAKAO_JAVASCRIPT_KEY);
@@ -1248,6 +1275,7 @@
 
         setStatus("loading");
         analyzeButton.disabled = true;
+        await loadModelScripts();
 
         const modelURL = MODEL_URL + "model.json";
         const metadataURL = MODEL_URL + "metadata.json";
@@ -1275,6 +1303,10 @@
           latestPredictions = null;
           invalidateShareCard();
           setPrimaryAction("analyze");
+          loadModel().catch((error) => {
+            console.error(error);
+            setStatus("needModel");
+          });
         };
         imagePreview.src = imageURL;
       }
@@ -1700,6 +1732,7 @@
         closeShareMenu();
         analyzeButton.disabled = true;
         try {
+          await loadKakaoScript().catch((error) => console.error(error));
           let file = latestShareFile;
           if (!file) {
             analyzeButton.textContent = t("preparingShare");
@@ -1805,11 +1838,6 @@
 
       setPrimaryAction("analyze");
       applyLanguage();
-
-      loadModel().catch((error) => {
-        console.error(error);
-        setStatus("needModel");
-      });
     </script>
   </body>
 </html>
