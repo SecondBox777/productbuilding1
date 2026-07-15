@@ -7,6 +7,9 @@
     "directory": ".",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "run_worker_first": ["/google8e1ad6d7f4037882.html"]
+    "run_worker_first": [
+      "/google8e1ad6d7f4037882.html",
+      "/naver8c57345239d00813fcb9a96ada5cffba.html"
+    ]
   }
 }
